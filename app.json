@@ -1,13 +1,13 @@
 {
   "expo": {
-    "name": "Lernspots",
-    "slug": "Lernspots",
+    "name": "LernSpots",
+    "slug": "LernSpots",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": false
     },
     "android": {
       "adaptiveIcon": {
@@ -19,6 +19,14 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "LernSpots verwendet deinen Standort, um Lernorte in deiner Nähe anzuzeigen und neue Spots zu speichern."
+        }
+      ]
+    ]
   }
 }
