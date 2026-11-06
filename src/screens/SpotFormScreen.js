@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
 import {
   AccessibilityInfo,
   Alert,
@@ -14,13 +14,13 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useApp } from '../context/AppContext';
 import PrimaryButton from '../components/PrimaryButton';
+import StandortAbschnitt from '../components/StandortAbschnitt';
 import StarRating from '../components/StarRating';
 import { CATEGORIES } from '../data/categories';
 import { colors, fontSizes, radius, spacing, touch } from '../theme';
 
 // S2 · Neuer Spot / Spot bearbeiten (Modal)
 // TODO (Mockup S2):
-//  - Standort übernehmen und Button «↻ Neu» (wartet auf useLocation aus Paket P02)
 //  - Duplikat-Warnung (gleicher Name < 50 m)
 //  - Entwurf in AsyncStorage (storage.saveDraft) sichern
 
@@ -92,18 +92,36 @@ function SwitchRow({ icon, label, value, onChange }) {
   );
 }
 
+const istZahl = (n) => typeof n === 'number' && Number.isFinite(n);
+
+// Startstandort: beim Bearbeiten der gespeicherte, beim Erfassen die Stelle, auf die man lange gedrückt hat
+function toStandort(spot, params) {
+  if (spot) return istZahl(spot.lat) && istZahl(spot.lng) ? { lat: spot.lat, lng: spot.lng, accuracy: null } : null;
+  return istZahl(params?.lat) && istZahl(params?.lng) ? { lat: params.lat, lng: params.lng, accuracy: null } : null;
+}
+
 export default function SpotFormScreen({ navigation, route }) {
-  const { getSpot, addSpot, updateSpot } = useApp();
+  const { getSpot, addSpot, updateSpot, settings } = useApp();
   const insets = useSafeAreaInsets();
   const editing = route.params?.spotId ? getSpot(route.params.spotId) : null;
 
   const [initial] = useState(() => toForm(editing));
   const [form, setForm] = useState(initial);
+  const [standort, setStandort] = useState(() => toStandort(editing, route.params));
+  const [standortGeaendert, setStandortGeaendert] = useState(false);
   const [touched, setTouched] = useState(false);
   const [saved, setSaved] = useState(false);
+  // Automatisch nur beim Erfassen und nur ohne vorgegebene Stelle von der Karte
+  const [autoStandort] = useState(() => !editing && !toStandort(null, route.params) && settings.autoStandort);
 
   const nameError = validateName(form.name);
-  const hasChanges = Object.keys(initial).some((key) => form[key] !== initial[key]);
+  const hasChanges = standortGeaendert || Object.keys(initial).some((key) => form[key] !== initial[key]);
+
+  // Automatisch ermittelter Standort ist keine Eingabe des Nutzers, löst also keine Rückfrage beim Abbrechen aus
+  const handleStandort = useCallback((coords, manuell) => {
+    setStandort(coords);
+    if (manuell) setStandortGeaendert(true);
+  }, []);
 
   function setField(key, value) {
     setForm((alt) => ({ ...alt, [key]: value }));
@@ -157,9 +175,9 @@ export default function SpotFormScreen({ navigation, route }) {
       name: form.name.trim(),
       oeffnungszeiten: form.oeffnungszeiten.trim(),
       notiz: form.notiz.trim(),
-      // Standort bleibt beim Bearbeiten erhalten, bis die Standort-Funktion da ist
-      lat: editing?.lat ?? null,
-      lng: editing?.lng ?? null,
+      // Ohne Standort bleiben lat und lng null, beim Bearbeiten gilt der alte Wert bis «Neu»
+      lat: standort?.lat ?? null,
+      lng: standort?.lng ?? null,
     };
     if (editing) updateSpot(editing.id, data);
     else addSpot(data);
@@ -251,6 +269,10 @@ export default function SpotFormScreen({ navigation, route }) {
           multiline
           accessibilityLabel="Notiz"
         />
+
+        <View style={styles.abschnitt}>
+          <StandortAbschnitt value={standort} autoStart={autoStandort} onChange={handleStandort} />
+        </View>
       </ScrollView>
 
       {/* Speichern fest unten im Daumenbereich */}

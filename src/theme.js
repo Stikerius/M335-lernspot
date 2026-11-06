@@ -6,6 +6,7 @@ export const colors = {
   primaryLight: '#E8EEFA',
   star: '#F2A900',         // nur für Sterne-Bewertungen
   danger: '#C62828',       // nur für destruktive Aktionen und Fehler
+  success: '#1B7F3B',      // nur für Bestätigungen, immer zusammen mit Text und «✓»
   text: '#1D2329',
   textMuted: '#5B6670',
   border: '#C9D1D7',
