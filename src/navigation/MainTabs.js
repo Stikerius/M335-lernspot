@@ -4,7 +4,8 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import SpotsListScreen from '../screens/SpotsListScreen';
 import MapScreen from '../screens/MapScreen';
 import SettingsScreen from '../screens/SettingsScreen';
-import { colors, touch } from '../theme';
+import useTheme from '../hooks/useTheme';
+import { touch } from '../theme';
 
 const Tab = createBottomTabNavigator();
 
@@ -15,6 +16,7 @@ function TabIcon({ symbol, color }) {
 }
 
 export default function MainTabs() {
+  const { colors } = useTheme();
   return (
     <Tab.Navigator
       screenOptions={{
