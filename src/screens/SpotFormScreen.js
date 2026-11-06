@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import {
   AccessibilityInfo,
   Alert,
@@ -17,7 +17,8 @@ import PrimaryButton from '../components/PrimaryButton';
 import StandortAbschnitt from '../components/StandortAbschnitt';
 import StarRating from '../components/StarRating';
 import { CATEGORIES } from '../data/categories';
-import { colors, fontSizes, radius, spacing, touch } from '../theme';
+import useTheme from '../hooks/useTheme';
+import { fontSizes, radius, spacing, touch } from '../theme';
 
 // S2 · Neuer Spot / Spot bearbeiten (Modal)
 // TODO (Mockup S2):
@@ -50,6 +51,8 @@ function toForm(spot) {
 }
 
 function Chip({ icon, label, selected, onPress }) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   return (
     <Pressable
       onPress={onPress}
@@ -69,6 +72,8 @@ function Chip({ icon, label, selected, onPress }) {
 
 // Ganze Zeile antippbar, der Schalter selbst nimmt keine Taps an
 function SwitchRow({ icon, label, value, onChange }) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   return (
     <Pressable
       onPress={() => onChange(!value)}
@@ -84,7 +89,7 @@ function SwitchRow({ icon, label, value, onChange }) {
         <Switch
           value={value}
           trackColor={{ false: colors.border, true: colors.primary }}
-          thumbColor={colors.surface}
+          thumbColor={value ? colors.onPrimary : colors.surface}
           ios_backgroundColor={colors.border}
         />
       </View>
@@ -101,6 +106,8 @@ function toStandort(spot, params) {
 }
 
 export default function SpotFormScreen({ navigation, route }) {
+  const { colors, isDark } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const { getSpot, addSpot, updateSpot, settings } = useApp();
   const insets = useSafeAreaInsets();
   const editing = route.params?.spotId ? getSpot(route.params.spotId) : null;
@@ -142,7 +149,7 @@ export default function SpotFormScreen({ navigation, route }) {
         </Pressable>
       ),
     });
-  }, [navigation]);
+  }, [navigation, styles]);
 
   // Fängt Abbrechen, System-Zurück und Wischen ab: mit Eingaben kommt erst eine Rückfrage
   useEffect(
@@ -213,6 +220,7 @@ export default function SpotFormScreen({ navigation, route }) {
           onBlur={() => setTouched(true)}
           placeholder="z. B. Stadtbibliothek"
           placeholderTextColor={colors.textMuted}
+          keyboardAppearance={isDark ? 'dark' : 'light'}
           style={[styles.input, touched && nameError && styles.inputError]}
           maxLength={80}
           accessibilityLabel="Name des Spots"
@@ -255,6 +263,7 @@ export default function SpotFormScreen({ navigation, route }) {
           onChangeText={(text) => setField('oeffnungszeiten', text)}
           placeholder="z. B. Mo–Fr 9–20, Sa 10–16"
           placeholderTextColor={colors.textMuted}
+          keyboardAppearance={isDark ? 'dark' : 'light'}
           style={styles.input}
           accessibilityLabel="Öffnungszeiten"
         />
@@ -265,6 +274,7 @@ export default function SpotFormScreen({ navigation, route }) {
           onChangeText={(text) => setField('notiz', text)}
           placeholder="z. B. 2. Stock hinten am ruhigsten"
           placeholderTextColor={colors.textMuted}
+          keyboardAppearance={isDark ? 'dark' : 'light'}
           style={[styles.input, styles.notiz]}
           multiline
           accessibilityLabel="Notiz"
@@ -289,65 +299,66 @@ export default function SpotFormScreen({ navigation, route }) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.surface },
-  content: { padding: spacing.m },
-  nichtGefunden: { padding: spacing.m, justifyContent: 'center', gap: spacing.m },
-  nichtGefundenText: { fontSize: fontSizes.body, color: colors.text, textAlign: 'center' },
-  abschnitt: { marginTop: spacing.m },
-  label: { fontSize: fontSizes.small, color: colors.textMuted, marginBottom: spacing.xs },
-  input: {
-    minHeight: touch.min,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.s,
-    paddingHorizontal: spacing.s,
-    fontSize: fontSizes.body,
-    color: colors.text,
-  },
-  inputError: { borderWidth: 2, borderColor: colors.danger },
-  error: { color: colors.danger, fontSize: fontSizes.small, marginTop: spacing.xs },
-  notiz: { minHeight: touch.min * 2, paddingTop: spacing.s, textAlignVertical: 'top' },
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.s },
-  chip: {
-    minHeight: touch.min,
-    paddingHorizontal: spacing.m,
-    borderRadius: radius.pill,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  chipSelected: { borderWidth: 2, borderColor: colors.primary, backgroundColor: colors.primaryLight },
-  chipText: { fontSize: fontSizes.body, color: colors.text },
-  chipTextSelected: { fontWeight: 'bold', color: colors.primary },
-  switches: { gap: spacing.s },
-  switchRow: {
-    minHeight: touch.min,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  switchLabel: { flex: 1, fontSize: fontSizes.body, color: colors.text },
-  pressed: { opacity: 0.7 },
-  abbrechen: { minHeight: touch.min, minWidth: touch.min, justifyContent: 'center' },
-  abbrechenText: { color: colors.primary, fontSize: fontSizes.body },
-  footer: {
-    paddingTop: spacing.m,
-    paddingHorizontal: spacing.m,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-    backgroundColor: colors.surface,
-  },
-  toast: {
-    position: 'absolute',
-    top: spacing.m,
-    alignSelf: 'center',
-    paddingVertical: spacing.s,
-    paddingHorizontal: spacing.m,
-    borderRadius: radius.pill,
-    backgroundColor: colors.text,
-  },
-  toastText: { color: colors.surface, fontSize: fontSizes.body, fontWeight: 'bold' },
-});
+const makeStyles = (colors) =>
+  StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.surface },
+    content: { padding: spacing.m },
+    nichtGefunden: { padding: spacing.m, justifyContent: 'center', gap: spacing.m },
+    nichtGefundenText: { fontSize: fontSizes.body, color: colors.text, textAlign: 'center' },
+    abschnitt: { marginTop: spacing.m },
+    label: { fontSize: fontSizes.small, color: colors.textMuted, marginBottom: spacing.xs },
+    input: {
+      minHeight: touch.min,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: radius.s,
+      paddingHorizontal: spacing.s,
+      fontSize: fontSizes.body,
+      color: colors.text,
+    },
+    inputError: { borderWidth: 2, borderColor: colors.danger },
+    error: { color: colors.danger, fontSize: fontSizes.small, marginTop: spacing.xs },
+    notiz: { minHeight: touch.min * 2, paddingTop: spacing.s, textAlignVertical: 'top' },
+    chips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.s },
+    chip: {
+      minHeight: touch.min,
+      paddingHorizontal: spacing.m,
+      borderRadius: radius.pill,
+      borderWidth: 1,
+      borderColor: colors.border,
+      backgroundColor: colors.surface,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    chipSelected: { borderWidth: 2, borderColor: colors.primary, backgroundColor: colors.primaryLight },
+    chipText: { fontSize: fontSizes.body, color: colors.text },
+    chipTextSelected: { fontWeight: 'bold', color: colors.primary },
+    switches: { gap: spacing.s },
+    switchRow: {
+      minHeight: touch.min,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    switchLabel: { flex: 1, fontSize: fontSizes.body, color: colors.text },
+    pressed: { opacity: 0.7 },
+    abbrechen: { minHeight: touch.min, minWidth: touch.min, justifyContent: 'center' },
+    abbrechenText: { color: colors.primary, fontSize: fontSizes.body },
+    footer: {
+      paddingTop: spacing.m,
+      paddingHorizontal: spacing.m,
+      borderTopWidth: 1,
+      borderTopColor: colors.border,
+      backgroundColor: colors.surface,
+    },
+    toast: {
+      position: 'absolute',
+      top: spacing.m,
+      alignSelf: 'center',
+      paddingVertical: spacing.s,
+      paddingHorizontal: spacing.m,
+      borderRadius: radius.pill,
+      backgroundColor: colors.text,
+    },
+    toastText: { color: colors.surface, fontSize: fontSizes.body, fontWeight: 'bold' },
+  });

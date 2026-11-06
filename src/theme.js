@@ -1,9 +1,12 @@
 // Zentrale Design-Werte – NIE Farben/Grössen direkt in Screens hardcoden,
 // immer von hier importieren (Konsistenz = Erwartungskonformität).
 
-export const colors = {
+// Zwei Paletten mit denselben Schlüsseln. Screens holen sie über den Hook useTheme (src/hooks/useTheme.js),
+// je nach Einstellung «Dunkles Design». Text auf den Farben ist überall mindestens 4.5 : 1 lesbar.
+export const lightColors = {
   primary: '#2F5BB7',      // Akzent-Blau: aktive / primäre Elemente
   primaryLight: '#E8EEFA',
+  onPrimary: '#FFFFFF',    // Schrift auf primary (Buttons, FAB)
   star: '#F2A900',         // nur für Sterne-Bewertungen
   danger: '#C62828',       // nur für destruktive Aktionen und Fehler
   success: '#1B7F3B',      // nur für Bestätigungen, immer zusammen mit Text und «✓»
@@ -13,7 +16,27 @@ export const colors = {
   background: '#F4F6F8',
   surface: '#FFFFFF',
   disabled: '#B7C3DC',
+  shadow: '#000000',
 };
+
+export const darkColors = {
+  primary: '#8AB4F8',
+  primaryLight: '#26324A',
+  onPrimary: '#121212',
+  star: '#F2A900',
+  danger: '#FF8A80',
+  success: '#6FD68F',
+  text: '#F2F2F2',
+  textMuted: '#A9B1BA',
+  border: '#5C646E',
+  background: '#121212',
+  surface: '#1E1E1E',
+  disabled: '#7F8A9E',
+  shadow: '#000000',
+};
+
+// Helle Palette unter dem alten Namen, damit bestehende Importe weiter funktionieren
+export const colors = lightColors;
 
 export const spacing = {
   xs: 4,

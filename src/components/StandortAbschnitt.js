@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { AccessibilityInfo, ActivityIndicator, Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import useLocation from '../hooks/useLocation';
-import { colors, fontSizes, radius, spacing, touch } from '../theme';
+import useTheme from '../hooks/useTheme';
+import { fontSizes, radius, spacing, touch } from '../theme';
 
 // Abschnitt «Standort» im Formular S2.
 // Der Hook useLocation fragt beim Einbinden sofort nach Berechtigung und Position. Darum steckt er
@@ -10,6 +11,8 @@ import { colors, fontSizes, radius, spacing, touch } from '../theme';
 // (automatisch bei «Standort automatisch übernehmen» oder nach Tipp auf den Button).
 
 function Aktion({ title, accessibilityLabel, onPress }) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   return (
     <Pressable
       onPress={onPress}
@@ -24,6 +27,8 @@ function Aktion({ title, accessibilityLabel, onPress }) {
 
 // status: 'idle' (noch nicht abgefragt) | 'loading' | 'denied' | 'error' | 'ready'
 function StandortAnzeige({ value, status, error, uebernommen, onErmitteln, onEinstellungen }) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const laedt = status === 'loading';
   const fehler = status === 'error';
   const denied = status === 'denied';
@@ -136,27 +141,28 @@ export default function StandortAbschnitt({ value, autoStart, onChange }) {
   return <StandortMitHook value={value} startManuell={startManuell.current} onChange={onChange} />;
 }
 
-const styles = StyleSheet.create({
-  label: { fontSize: fontSizes.small, color: colors.textMuted, marginBottom: spacing.xs },
-  block: { marginTop: spacing.s, gap: spacing.s },
-  wertZeile: { flexDirection: 'row', alignItems: 'center', gap: spacing.m },
-  wert: { flex: 1 },
-  koordinaten: { fontSize: fontSizes.body, color: colors.text },
-  genauigkeit: { fontSize: fontSizes.small, color: colors.textMuted },
-  hinweis: { fontSize: fontSizes.body, color: colors.textMuted },
-  ladeZeile: { flexDirection: 'row', alignItems: 'center' },
-  bestaetigung: { fontSize: fontSizes.body, fontWeight: 'bold', color: colors.success },
-  fehler: { fontSize: fontSizes.body, color: colors.danger },
-  aktion: {
-    minHeight: touch.min,
-    paddingHorizontal: spacing.m,
-    borderRadius: radius.m,
-    borderWidth: 1.5,
-    borderColor: colors.primary,
-    backgroundColor: colors.surface,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  aktionText: { fontSize: fontSizes.body, fontWeight: 'bold', color: colors.primary },
-  pressed: { opacity: 0.7 },
-});
+const makeStyles = (colors) =>
+  StyleSheet.create({
+    label: { fontSize: fontSizes.small, color: colors.textMuted, marginBottom: spacing.xs },
+    block: { marginTop: spacing.s, gap: spacing.s },
+    wertZeile: { flexDirection: 'row', alignItems: 'center', gap: spacing.m },
+    wert: { flex: 1 },
+    koordinaten: { fontSize: fontSizes.body, color: colors.text },
+    genauigkeit: { fontSize: fontSizes.small, color: colors.textMuted },
+    hinweis: { fontSize: fontSizes.body, color: colors.textMuted },
+    ladeZeile: { flexDirection: 'row', alignItems: 'center' },
+    bestaetigung: { fontSize: fontSizes.body, fontWeight: 'bold', color: colors.success },
+    fehler: { fontSize: fontSizes.body, color: colors.danger },
+    aktion: {
+      minHeight: touch.min,
+      paddingHorizontal: spacing.m,
+      borderRadius: radius.m,
+      borderWidth: 1.5,
+      borderColor: colors.primary,
+      backgroundColor: colors.surface,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    aktionText: { fontSize: fontSizes.body, fontWeight: 'bold', color: colors.primary },
+    pressed: { opacity: 0.7 },
+  });

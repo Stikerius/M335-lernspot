@@ -1,10 +1,11 @@
-import { useLayoutEffect } from 'react';
+import { useLayoutEffect, useMemo } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { useApp } from '../context/AppContext';
 import { getCategory } from '../data/categories';
 import PrimaryButton from '../components/PrimaryButton';
-import { colors, fontSizes, spacing, touch } from '../theme';
+import useTheme from '../hooks/useTheme';
+import { fontSizes, spacing, touch } from '../theme';
 
 // S4 · Detail (Stack)
 // Grundgerüst: Daten anzeigen, Favorit, Bearbeiten (Modal), Löschen mit Bestätigung.
@@ -14,6 +15,8 @@ import { colors, fontSizes, spacing, touch } from '../theme';
 //  - Distanz zum aktuellen Standort
 //  - Toast «Zu Favoriten hinzugefügt»
 export default function SpotDetailScreen({ navigation, route }) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const { getSpot, deleteSpot, toggleFavorite } = useApp();
   const spot = getSpot(route.params?.spotId);
 
@@ -33,7 +36,7 @@ export default function SpotDetailScreen({ navigation, route }) {
         </Pressable>
       ),
     });
-  }, [navigation, spot, toggleFavorite]);
+  }, [navigation, spot, toggleFavorite, colors]);
 
   // Spot wurde gelöscht oder existiert nicht (mehr)
   if (!spot) {
@@ -84,6 +87,8 @@ export default function SpotDetailScreen({ navigation, route }) {
 }
 
 function Row({ label, value }) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   return (
     <View style={styles.row}>
       <Text style={styles.label}>{label}</Text>
@@ -92,19 +97,20 @@ function Row({ label, value }) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.surface },
-  content: { padding: spacing.m },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: spacing.s + 2,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.border,
-  },
-  label: { color: colors.textMuted, fontSize: fontSizes.body },
-  value: { color: colors.text, fontSize: fontSizes.body, flexShrink: 1, textAlign: 'right', marginLeft: spacing.m },
-  actions: { flexDirection: 'row', marginTop: spacing.l, gap: spacing.s },
-  action: { flex: 1 },
-});
+const makeStyles = (colors) =>
+  StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.surface },
+    content: { padding: spacing.m },
+    center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+    row: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      paddingVertical: spacing.s + 2,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: colors.border,
+    },
+    label: { color: colors.textMuted, fontSize: fontSizes.body },
+    value: { color: colors.text, fontSize: fontSizes.body, flexShrink: 1, textAlign: 'right', marginLeft: spacing.m },
+    actions: { flexDirection: 'row', marginTop: spacing.l, gap: spacing.s },
+    action: { flex: 1 },
+  });

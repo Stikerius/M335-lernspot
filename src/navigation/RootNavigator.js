@@ -3,7 +3,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import MainTabs from './MainTabs';
 import SpotDetailScreen from '../screens/SpotDetailScreen';
 import SpotFormScreen from '../screens/SpotFormScreen';
-import { colors } from '../theme';
+import useTheme from '../hooks/useTheme';
 
 // Navigationsstruktur gemäss Workflow-Diagramm im Konzept:
 //
@@ -14,6 +14,7 @@ import { colors } from '../theme';
 const Stack = createNativeStackNavigator();
 
 export default function RootNavigator() {
+  const { colors } = useTheme();
   return (
     <Stack.Navigator
       screenOptions={{

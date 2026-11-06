@@ -1,8 +1,10 @@
+import { useMemo } from 'react';
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { useApp } from '../context/AppContext';
 import SpotListItem from '../components/SpotListItem';
-import { colors, fontSizes, radius, spacing, touch } from '../theme';
+import useTheme from '../hooks/useTheme';
+import { fontSizes, radius, spacing, touch } from '../theme';
 
 // S1 · Spots (Startscreen)
 // Grundgerüst: Liste aus AsyncStorage, Tap → Detail, FAB → Formular (Modal).
@@ -11,6 +13,8 @@ import { colors, fontSizes, radius, spacing, touch } from '../theme';
 //  - Filter-Chips (Alle / Steckdose / Ruhig / Favoriten), Filter in AsyncStorage merken
 //  - Leer-Zustand «Kein Spot passt zum Filter» mit «Filter zurücksetzen»
 export default function SpotsListScreen({ navigation }) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const { spots, loading } = useApp();
 
   if (loading) {
@@ -53,30 +57,31 @@ export default function SpotsListScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  empty: {
-    textAlign: 'center',
-    color: colors.textMuted,
-    fontSize: fontSizes.body,
-    padding: spacing.xl,
-  },
-  fab: {
-    position: 'absolute',
-    right: spacing.m,
-    bottom: spacing.m,
-    height: touch.fab,
-    paddingHorizontal: spacing.l,
-    borderRadius: radius.pill,
-    backgroundColor: colors.primary,
-    justifyContent: 'center',
-    // Schatten iOS + Android
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  fabLabel: { color: colors.surface, fontSize: fontSizes.body, fontWeight: 'bold' },
-});
+const makeStyles = (colors) =>
+  StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.background },
+    center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+    empty: {
+      textAlign: 'center',
+      color: colors.textMuted,
+      fontSize: fontSizes.body,
+      padding: spacing.xl,
+    },
+    fab: {
+      position: 'absolute',
+      right: spacing.m,
+      bottom: spacing.m,
+      height: touch.fab,
+      paddingHorizontal: spacing.l,
+      borderRadius: radius.pill,
+      backgroundColor: colors.primary,
+      justifyContent: 'center',
+      // Schatten iOS + Android
+      shadowColor: colors.shadow,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.25,
+      shadowRadius: 4,
+      elevation: 5,
+    },
+    fabLabel: { color: colors.onPrimary, fontSize: fontSizes.body, fontWeight: 'bold' },
+  });

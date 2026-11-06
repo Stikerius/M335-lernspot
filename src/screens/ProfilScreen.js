@@ -1,8 +1,12 @@
+import { useMemo } from 'react';
 import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { colors, fontSizes } from '../theme';
+import useTheme from '../hooks/useTheme';
+import { fontSizes } from '../theme';
 
 function Statistik({ zahl, label }) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   return (
     <View style={styles.statistik}>
       <Text style={styles.zahl}>{zahl}</Text>
@@ -12,6 +16,8 @@ function Statistik({ zahl, label }) {
 }
 
 function ProfilKarte({ bild, name, rolle, beschreibung, beitraege, follower, folgt }) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   return (
     <View style={styles.karte}>
       <Image source={{ uri: bild }} style={styles.bild} accessibilityLabel={`Profilbild von ${name}`} />
@@ -29,6 +35,8 @@ function ProfilKarte({ bild, name, rolle, beschreibung, beitraege, follower, fol
 
 // Tag-1-Aufgabe: noch nicht in die Navigation eingebunden
 export default function ProfilScreen() {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   return (
     <ScrollView style={styles.scroll} contentContainerStyle={styles.inhalt}>
       <ProfilKarte
@@ -53,74 +61,75 @@ export default function ProfilScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  scroll: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  // Flexbox: flexGrow füllt die Höhe, justifyContent und alignItems zentrieren die Karten
-  inhalt: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 64,
-    gap: 24,
-  },
-  karte: {
-    width: '90%',
-    alignItems: 'center',
-    padding: 24,
-    borderRadius: 16,
-    backgroundColor: colors.surface,
-    // Schatten für iOS
-    shadowColor: colors.text,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    // Schatten für Android
-    elevation: 5,
-  },
-  // Rundes Bild: borderRadius ist die halbe Breite und Höhe
-  bild: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    marginBottom: 16,
-  },
-  name: {
-    fontSize: fontSizes.large,
-    fontWeight: 'bold',
-    color: colors.text,
-  },
-  // Flexbox: Die drei Zahlen stehen nebeneinander mit gleichmässigem Abstand
-  statistikZeile: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignSelf: 'stretch',
-    marginVertical: 16,
-  },
-  statistik: {
-    alignItems: 'center',
-  },
-  zahl: {
-    fontSize: fontSizes.title,
-    fontWeight: 'bold',
-    color: colors.text,
-  },
-  statistikLabel: {
-    fontSize: fontSizes.small,
-    color: colors.textMuted,
-  },
-  rolle: {
-    fontSize: fontSizes.body,
-    fontWeight: '600',
-    color: colors.primary,
-    marginBottom: 8,
-  },
-  beschreibung: {
-    fontSize: fontSizes.body,
-    lineHeight: 24,
-    color: colors.textMuted,
-    textAlign: 'center',
-  },
-});
+const makeStyles = (colors) =>
+  StyleSheet.create({
+    scroll: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    // Flexbox: flexGrow füllt die Höhe, justifyContent und alignItems zentrieren die Karten
+    inhalt: {
+      flexGrow: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingVertical: 64,
+      gap: 24,
+    },
+    karte: {
+      width: '90%',
+      alignItems: 'center',
+      padding: 24,
+      borderRadius: 16,
+      backgroundColor: colors.surface,
+      // Schatten für iOS
+      shadowColor: colors.shadow,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.2,
+      shadowRadius: 8,
+      // Schatten für Android
+      elevation: 5,
+    },
+    // Rundes Bild: borderRadius ist die halbe Breite und Höhe
+    bild: {
+      width: 120,
+      height: 120,
+      borderRadius: 60,
+      marginBottom: 16,
+    },
+    name: {
+      fontSize: fontSizes.large,
+      fontWeight: 'bold',
+      color: colors.text,
+    },
+    // Flexbox: Die drei Zahlen stehen nebeneinander mit gleichmässigem Abstand
+    statistikZeile: {
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+      alignSelf: 'stretch',
+      marginVertical: 16,
+    },
+    statistik: {
+      alignItems: 'center',
+    },
+    zahl: {
+      fontSize: fontSizes.title,
+      fontWeight: 'bold',
+      color: colors.text,
+    },
+    statistikLabel: {
+      fontSize: fontSizes.small,
+      color: colors.textMuted,
+    },
+    rolle: {
+      fontSize: fontSizes.body,
+      fontWeight: '600',
+      color: colors.primary,
+      marginBottom: 8,
+    },
+    beschreibung: {
+      fontSize: fontSizes.body,
+      lineHeight: 24,
+      color: colors.textMuted,
+      textAlign: 'center',
+    },
+  });
