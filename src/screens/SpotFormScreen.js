@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useState } from 'react';
 import {
   AccessibilityInfo,
+  Alert,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -96,11 +97,13 @@ export default function SpotFormScreen({ navigation, route }) {
   const insets = useSafeAreaInsets();
   const editing = route.params?.spotId ? getSpot(route.params.spotId) : null;
 
-  const [form, setForm] = useState(() => toForm(editing));
+  const [initial] = useState(() => toForm(editing));
+  const [form, setForm] = useState(initial);
   const [touched, setTouched] = useState(false);
   const [saved, setSaved] = useState(false);
 
   const nameError = validateName(form.name);
+  const hasChanges = Object.keys(initial).some((key) => form[key] !== initial[key]);
 
   function setField(key, value) {
     setForm((alt) => ({ ...alt, [key]: value }));
@@ -122,6 +125,20 @@ export default function SpotFormScreen({ navigation, route }) {
       ),
     });
   }, [navigation]);
+
+  // Fängt Abbrechen, System-Zurück und Wischen ab: mit Eingaben kommt erst eine Rückfrage
+  useEffect(
+    () =>
+      navigation.addListener('beforeRemove', (e) => {
+        if (saved || !hasChanges) return;
+        e.preventDefault();
+        Alert.alert('Änderungen verwerfen?', 'Deine Eingaben wurden noch nicht gespeichert.', [
+          { text: 'Weiter bearbeiten', style: 'cancel' },
+          { text: 'Verwerfen', style: 'destructive', onPress: () => navigation.dispatch(e.data.action) },
+        ]);
+      }),
+    [navigation, saved, hasChanges]
+  );
 
   // Nach dem Speichern kurz die Bestätigung zeigen, dann das Modal schliessen
   useEffect(() => {
@@ -148,6 +165,16 @@ export default function SpotFormScreen({ navigation, route }) {
     else addSpot(data);
     setSaved(true);
     AccessibilityInfo.announceForAccessibility('Spot gespeichert');
+  }
+
+  // Spot wurde inzwischen gelöscht: klare Meldung statt leerem Formular
+  if (route.params?.spotId && !editing) {
+    return (
+      <View style={[styles.container, styles.nichtGefunden]}>
+        <Text style={styles.nichtGefundenText}>Dieser Spot existiert nicht mehr.</Text>
+        <PrimaryButton title="Zurück" onPress={() => navigation.goBack()} />
+      </View>
+    );
   }
 
   return (
@@ -243,6 +270,8 @@ export default function SpotFormScreen({ navigation, route }) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.surface },
   content: { padding: spacing.m },
+  nichtGefunden: { padding: spacing.m, justifyContent: 'center', gap: spacing.m },
+  nichtGefundenText: { fontSize: fontSizes.body, color: colors.text, textAlign: 'center' },
   abschnitt: { marginTop: spacing.m },
   label: { fontSize: fontSizes.small, color: colors.textMuted, marginBottom: spacing.xs },
   input: {
