@@ -2,8 +2,9 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 
 import * as storage from '../storage/storage';
 import { SEED_SPOTS } from '../data/seedSpots';
+import { sanitizeFilter } from '../utils/filterSpots';
 
-// Globaler App-Zustand: Spots + Einstellungen.
+// Globaler App-Zustand: Spots, Einstellungen und Listen-Filter (Chips).
 // Jede Änderung wird sofort in AsyncStorage gespeichert (Persistenz).
 const AppContext = createContext(null);
 
@@ -14,6 +15,8 @@ function createId() {
 export function AppProvider({ children }) {
   const [spots, setSpots] = useState([]);
   const [settings, setSettings] = useState(storage.DEFAULT_SETTINGS);
+  // Aktive Chips der Spot-Liste, [] = «Alle». Der Suchtext wird bewusst nicht gespeichert.
+  const [filter, setFilter] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // Beim App-Start laden; beim allerersten Start Beispiel-Spots einfügen
@@ -27,6 +30,7 @@ export function AppProvider({ children }) {
       }
       setSpots(loadedSpots);
       setSettings(await storage.loadSettings());
+      setFilter(sanitizeFilter(await storage.loadFilter()));
       setLoading(false);
     })();
   }, []);
@@ -79,10 +83,17 @@ export function AppProvider({ children }) {
     [settings]
   );
 
+  const updateFilter = useCallback((next) => {
+    const clean = sanitizeFilter(next);
+    setFilter(clean);
+    storage.saveFilter(clean);
+  }, []);
+
   const resetAll = useCallback(async () => {
     await storage.clearAll();
     setSpots([]);
     setSettings(storage.DEFAULT_SETTINGS);
+    setFilter([]);
     await storage.markSeeded(); // nach «Alles löschen» keine Beispiel-Spots mehr
   }, []);
 
@@ -90,6 +101,7 @@ export function AppProvider({ children }) {
     () => ({
       spots,
       settings,
+      filter,
       loading,
       getSpot: (id) => spots.find((s) => s.id === id),
       addSpot,
@@ -97,9 +109,10 @@ export function AppProvider({ children }) {
       deleteSpot,
       toggleFavorite,
       updateSettings,
+      updateFilter,
       resetAll,
     }),
-    [spots, settings, loading, addSpot, updateSpot, deleteSpot, toggleFavorite, updateSettings, resetAll]
+    [spots, settings, filter, loading, addSpot, updateSpot, deleteSpot, toggleFavorite, updateSettings, updateFilter, resetAll]
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
