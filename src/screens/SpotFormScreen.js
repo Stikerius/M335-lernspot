@@ -2,6 +2,9 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'reac
 import {
   AccessibilityInfo,
   Alert,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -10,6 +13,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { useHeaderHeight } from '@react-navigation/elements';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useApp } from '../context/AppContext';
@@ -110,6 +114,19 @@ export default function SpotFormScreen({ navigation, route }) {
   const styles = useMemo(() => makeStyles(colors, fontSizes), [colors, fontSizes]);
   const { getSpot, addSpot, updateSpot, settings } = useApp();
   const insets = useSafeAreaInsets();
+  const headerHeight = useHeaderHeight();
+
+  // Bei offener Tastatur deckt sie den Home-Indicator ab, der Footer braucht dann keinen Zusatzabstand
+  const [keyboardOffen, setKeyboardOffen] = useState(false);
+  useEffect(() => {
+    const ios = Platform.OS === 'ios';
+    const zeigen = Keyboard.addListener(ios ? 'keyboardWillShow' : 'keyboardDidShow', () => setKeyboardOffen(true));
+    const verbergen = Keyboard.addListener(ios ? 'keyboardWillHide' : 'keyboardDidHide', () => setKeyboardOffen(false));
+    return () => {
+      zeigen.remove();
+      verbergen.remove();
+    };
+  }, []);
   const editing = route.params?.spotId ? getSpot(route.params.spotId) : null;
 
   const [initial] = useState(() => toForm(editing));
@@ -203,7 +220,11 @@ export default function SpotFormScreen({ navigation, route }) {
   }
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      keyboardVerticalOffset={headerHeight}
+    >
       <ScrollView
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
@@ -286,7 +307,7 @@ export default function SpotFormScreen({ navigation, route }) {
       </ScrollView>
 
       {/* Speichern fest unten im Daumenbereich */}
-      <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, spacing.m) }]}>
+      <View style={[styles.footer, { paddingBottom: keyboardOffen ? spacing.m : Math.max(insets.bottom, spacing.m) }]}>
         <PrimaryButton title="Speichern" onPress={handleSave} disabled={!!nameError || saved} />
       </View>
 
@@ -295,7 +316,7 @@ export default function SpotFormScreen({ navigation, route }) {
           <Text style={styles.toastText}>Spot gespeichert ✓</Text>
         </View>
       ) : null}
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
