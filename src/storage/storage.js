@@ -12,7 +12,7 @@ export const KEYS = {
 };
 
 export const DEFAULT_SETTINGS = {
-  sortierung: 'distanz',          // 'distanz' | 'bewertung'
+  sortierung: 'naechste',         // 'naechste' | 'ruhe' | 'neueste'
   suchradius: null,               // Meter (1000 | 5000 | 10000), null = «Alle»
   autoStandort: true,
   darkMode: false,
@@ -43,11 +43,16 @@ export const loadSpots = () => readJson(KEYS.spots, []);
 export const saveSpots = (spots) => writeJson(KEYS.spots, spots);
 
 const RADIUS_WERTE = [1000, 5000, 10000];
+const SORTIERUNGEN = ['naechste', 'ruhe', 'neueste'];
+// Werte aus älteren App-Versionen, damit gespeicherte Einstellungen erhalten bleiben
+const ALTE_SORTIERUNG = { distanz: 'naechste', bewertung: 'ruhe' };
 
 // Gespeicherte Einstellungen absichern: unbekannte Werte fallen auf den Standard zurück
 function normalizeSettings(raw) {
   const settings = { ...DEFAULT_SETTINGS, ...raw };
   if (!RADIUS_WERTE.includes(settings.suchradius)) settings.suchradius = null;
+  settings.sortierung = ALTE_SORTIERUNG[settings.sortierung] ?? settings.sortierung;
+  if (!SORTIERUNGEN.includes(settings.sortierung)) settings.sortierung = DEFAULT_SETTINGS.sortierung;
   return settings;
 }
 

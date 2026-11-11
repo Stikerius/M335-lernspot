@@ -4,12 +4,12 @@ import { Alert, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 're
 import { useApp } from '../context/AppContext';
 import useTheme from '../hooks/useTheme';
 import { RADIUS_OPTIONS } from '../utils/filterSpots';
+import { SORT_OPTIONS } from '../utils/sortSpots';
 import { radius, spacing, touch } from '../theme';
 
 // S5 · Einstellungen (Tab)
 // Grundgerüst: Schalter werden sofort in AsyncStorage gespeichert, «Alle Daten löschen» mit Bestätigung.
 // TODO (Mockup S5):
-//  - Segment «Nach Distanz / Nach Bewertung»
 //  - Export als JSON über Teilen-Menü (Share API) mit Lade-Zustand
 export default function SettingsScreen() {
   const { colors, fontSizes } = useTheme();
@@ -25,6 +25,15 @@ export default function SettingsScreen() {
 
   return (
     <ScrollView style={styles.container}>
+      <Section title="Liste" />
+      <SegmentRow
+        label="Sortierung"
+        hint="Ohne Standort wird die Liste immer alphabetisch sortiert."
+        options={SORT_OPTIONS}
+        value={settings.sortierung}
+        onChange={(v) => updateSettings({ sortierung: v })}
+      />
+
       <Section title="Erfassen" />
       <SwitchRow
         label="Standort automatisch übernehmen"
