@@ -75,11 +75,11 @@ Jeder Testfall wird auf beiden Geräten durchgeführt. Die Spalten Ergebnis iPho
 
 ## 4. Fehlerprotokoll
 
-Gefundene Fehler werden hier eingetragen. Die Schwere ist Kritisch, Hoch, Mittel oder Niedrig. Der Status ist Offen, In Arbeit, Behoben oder Geprüft.
+Gefundene Fehler werden hier eingetragen. Das Gerät ist iPhone, Android oder beide. Das GitHub-Issue ist die Nummer des Issues im Repository, zum Beispiel #12. Die Schwere ist Kritisch, Hoch, Mittel oder Niedrig. Der Status ist Offen, In Arbeit, Behoben oder Geprüft.
 
-| ID | Beschreibung | Schwere | Status |
-|---|---|---|---|
-| | | | |
+| ID | Beschreibung | Gerät | Schwere | Status | GitHub-Issue |
+|---|---|---|---|---|---|
+| | | | | | |
 
 ## 5. Abnahmekriterien
 
