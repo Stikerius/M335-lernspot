@@ -12,11 +12,12 @@ const Tab = createBottomTabNavigator();
 // Einfache Text-Icons, damit keine zusätzliche Icon-Library nötig ist.
 // Kann später durch @expo/vector-icons ersetzt werden.
 function TabIcon({ symbol, color }) {
-  return <Text style={{ fontSize: 20, color }}>{symbol}</Text>;
+  const { fontSizes } = useTheme();
+  return <Text style={{ fontSize: fontSizes.title, color }}>{symbol}</Text>;
 }
 
 export default function MainTabs() {
-  const { colors } = useTheme();
+  const { colors, fontSizes } = useTheme();
   return (
     <Tab.Navigator
       screenOptions={{
@@ -24,8 +25,8 @@ export default function MainTabs() {
         tabBarInactiveTintColor: colors.textMuted,
         // Tab-Bar mind. 56 dp hoch (Touch-Target, siehe Konzept)
         tabBarStyle: { minHeight: touch.tabBar },
-        tabBarLabelStyle: { fontSize: 12 },
-        headerTitleStyle: { color: colors.text },
+        tabBarLabelStyle: { fontSize: fontSizes.small },
+        headerTitleStyle: { color: colors.text, fontSize: fontSizes.body },
       }}
     >
       <Tab.Screen

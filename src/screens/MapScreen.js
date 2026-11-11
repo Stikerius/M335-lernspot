@@ -17,7 +17,8 @@ import PrimaryButton from '../components/PrimaryButton';
 import SpotInfoCard from '../components/SpotInfoCard';
 import { distanceInMeters } from '../utils/distance';
 import { isOnline } from '../utils/network';
-import { colors, fontSizes, radius, spacing, touch } from '../theme';
+import useTheme from '../hooks/useTheme';
+import { radius, spacing, touch } from '../theme';
 
 // S3 · Karte (Special Feature GPS)
 // Alle Spots als Pins, eigener Standort als «Du», Zentrier-Button 48 × 48,
@@ -51,6 +52,8 @@ function regionForSpots(spots) {
 
 // Eigener Standort als blauer Punkt mit Beschriftung «Du» (Info nie nur über Farbe)
 function UserMarker({ coords }) {
+  const { colors, fontSizes } = useTheme();
+  const styles = useMemo(() => makeStyles(colors, fontSizes), [colors, fontSizes]);
   // Android zeichnet eigene Marker-Views nur, solange tracksViewChanges aktiv ist.
   // Nach dem ersten Zeichnen ausschalten, sonst ruckelt die Karte.
   const [tracks, setTracks] = useState(true);
@@ -76,6 +79,8 @@ function UserMarker({ coords }) {
 }
 
 export default function MapScreen({ navigation }) {
+  const { colors, fontSizes } = useTheme();
+  const styles = useMemo(() => makeStyles(colors, fontSizes), [colors, fontSizes]);
   const { spots, loading } = useApp();
   const { coords, status, error, refresh } = useLocation();
   const mapRef = useRef(null);
@@ -294,80 +299,81 @@ export default function MapScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background },
-  centerText: { marginTop: spacing.s, fontSize: fontSizes.body, color: colors.textMuted },
-  flex: { flex: 1 },
+const makeStyles = (colors, fontSizes) =>
+  StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.background },
+    center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background },
+    centerText: { marginTop: spacing.s, fontSize: fontSizes.body, color: colors.textMuted },
+    flex: { flex: 1 },
 
-  banners: { position: 'absolute', top: spacing.s, left: spacing.s, right: spacing.s, gap: spacing.s },
-  banner: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.l,
-    padding: spacing.m,
-    borderWidth: 1,
-    borderColor: colors.border,
-    elevation: 4,
-    shadowColor: colors.text,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-  },
-  bannerTitle: { fontSize: fontSizes.body, fontWeight: 'bold', color: colors.text },
-  bannerText: { fontSize: fontSizes.small, color: colors.textMuted, marginTop: spacing.xs },
-  bannerRow: { flexDirection: 'row', gap: spacing.s },
-  bannerButton: { marginTop: spacing.s },
-  pill: {
-    alignSelf: 'center',
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.s,
-    backgroundColor: colors.surface,
-    borderRadius: radius.pill,
-    paddingHorizontal: spacing.m,
-    paddingVertical: spacing.s,
-    elevation: 3,
-  },
-  pillText: { fontSize: fontSizes.small, color: colors.text },
+    banners: { position: 'absolute', top: spacing.s, left: spacing.s, right: spacing.s, gap: spacing.s },
+    banner: {
+      backgroundColor: colors.surface,
+      borderRadius: radius.l,
+      padding: spacing.m,
+      borderWidth: 1,
+      borderColor: colors.border,
+      elevation: 4,
+      shadowColor: colors.text,
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.15,
+      shadowRadius: 4,
+    },
+    bannerTitle: { fontSize: fontSizes.body, fontWeight: 'bold', color: colors.text },
+    bannerText: { fontSize: fontSizes.small, color: colors.textMuted, marginTop: spacing.xs },
+    bannerRow: { flexDirection: 'row', gap: spacing.s },
+    bannerButton: { marginTop: spacing.s },
+    pill: {
+      alignSelf: 'center',
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.s,
+      backgroundColor: colors.surface,
+      borderRadius: radius.pill,
+      paddingHorizontal: spacing.m,
+      paddingVertical: spacing.s,
+      elevation: 3,
+    },
+    pillText: { fontSize: fontSizes.small, color: colors.text },
 
-  bottom: { position: 'absolute', left: spacing.m, right: spacing.m, bottom: spacing.m, gap: spacing.s },
-  centerButton: {
-    alignSelf: 'flex-end',
-    width: touch.min,
-    height: touch.min,
-    borderRadius: radius.m,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-    alignItems: 'center',
-    justifyContent: 'center',
-    elevation: 4,
-    shadowColor: colors.text,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-  },
-  pressed: { backgroundColor: colors.primaryLight },
-  centerIcon: { fontSize: fontSizes.title, color: colors.primary, lineHeight: fontSizes.title + 2 },
-  centerLabel: { fontSize: fontSizes.small, color: colors.primary, fontWeight: 'bold', lineHeight: fontSizes.small + 2 },
+    bottom: { position: 'absolute', left: spacing.m, right: spacing.m, bottom: spacing.m, gap: spacing.s },
+    centerButton: {
+      alignSelf: 'flex-end',
+      minWidth: touch.min,
+      minHeight: touch.min,
+      borderRadius: radius.m,
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+      alignItems: 'center',
+      justifyContent: 'center',
+      elevation: 4,
+      shadowColor: colors.text,
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.2,
+      shadowRadius: 3,
+    },
+    pressed: { backgroundColor: colors.primaryLight },
+    centerIcon: { fontSize: fontSizes.title, color: colors.primary, lineHeight: fontSizes.title + 2 },
+    centerLabel: { fontSize: fontSizes.small, color: colors.primary, fontWeight: 'bold', lineHeight: fontSizes.small + 2 },
 
-  userMarker: { alignItems: 'center' },
-  userDot: {
-    width: spacing.m,
-    height: spacing.m,
-    borderRadius: radius.pill,
-    backgroundColor: colors.primary,
-    borderWidth: 3,
-    borderColor: colors.surface,
-  },
-  userLabel: {
-    marginTop: spacing.xs / 2,
-    paddingHorizontal: spacing.xs,
-    borderRadius: radius.s,
-    overflow: 'hidden',
-    backgroundColor: colors.primary,
-    color: colors.surface,
-    fontSize: fontSizes.small,
-    fontWeight: 'bold',
-  },
-});
+    userMarker: { alignItems: 'center' },
+    userDot: {
+      width: spacing.m,
+      height: spacing.m,
+      borderRadius: radius.pill,
+      backgroundColor: colors.primary,
+      borderWidth: 3,
+      borderColor: colors.surface,
+    },
+    userLabel: {
+      marginTop: spacing.xs / 2,
+      paddingHorizontal: spacing.xs,
+      borderRadius: radius.s,
+      overflow: 'hidden',
+      backgroundColor: colors.primary,
+      color: colors.surface,
+      fontSize: fontSizes.small,
+      fontWeight: 'bold',
+    },
+  });

@@ -3,7 +3,7 @@ import { Pressable, ScrollView, StyleSheet, Text } from 'react-native';
 
 import useTheme from '../hooks/useTheme';
 import { FILTER_CHIPS, toggleFilter } from '../utils/filterSpots';
-import { fontSizes, radius, spacing, touch } from '../theme';
+import { radius, spacing, touch } from '../theme';
 
 // Horizontale Chip-Leiste der Spot-Liste (S1): Alle · Steckdose · Ruhig · Favoriten.
 // Mehrere Chips kombinierbar, «Alle» setzt zurück.
@@ -25,8 +25,8 @@ function Chip({ label, active, onPress, styles }) {
 }
 
 export default function FilterChips({ value, onChange }) {
-  const { colors } = useTheme();
-  const styles = useMemo(() => makeStyles(colors), [colors]);
+  const { colors, fontSizes } = useTheme();
+  const styles = useMemo(() => makeStyles(colors, fontSizes), [colors, fontSizes]);
 
   return (
     <ScrollView
@@ -49,7 +49,7 @@ export default function FilterChips({ value, onChange }) {
   );
 }
 
-const makeStyles = (colors) =>
+const makeStyles = (colors, fontSizes) =>
   StyleSheet.create({
     // 8 dp Abstand zwischen den Chips und zum Rand
     row: { paddingHorizontal: spacing.m, gap: spacing.s },

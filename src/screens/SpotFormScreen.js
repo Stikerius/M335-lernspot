@@ -18,7 +18,7 @@ import StandortAbschnitt from '../components/StandortAbschnitt';
 import StarRating from '../components/StarRating';
 import { CATEGORIES } from '../data/categories';
 import useTheme from '../hooks/useTheme';
-import { fontSizes, radius, spacing, touch } from '../theme';
+import { radius, spacing, touch } from '../theme';
 
 // S2 · Neuer Spot / Spot bearbeiten (Modal)
 // TODO (Mockup S2):
@@ -51,8 +51,8 @@ function toForm(spot) {
 }
 
 function Chip({ icon, label, selected, onPress }) {
-  const { colors } = useTheme();
-  const styles = useMemo(() => makeStyles(colors), [colors]);
+  const { colors, fontSizes } = useTheme();
+  const styles = useMemo(() => makeStyles(colors, fontSizes), [colors, fontSizes]);
   return (
     <Pressable
       onPress={onPress}
@@ -72,8 +72,8 @@ function Chip({ icon, label, selected, onPress }) {
 
 // Ganze Zeile antippbar, der Schalter selbst nimmt keine Taps an
 function SwitchRow({ icon, label, value, onChange }) {
-  const { colors } = useTheme();
-  const styles = useMemo(() => makeStyles(colors), [colors]);
+  const { colors, fontSizes } = useTheme();
+  const styles = useMemo(() => makeStyles(colors, fontSizes), [colors, fontSizes]);
   return (
     <Pressable
       onPress={() => onChange(!value)}
@@ -106,8 +106,8 @@ function toStandort(spot, params) {
 }
 
 export default function SpotFormScreen({ navigation, route }) {
-  const { colors, isDark } = useTheme();
-  const styles = useMemo(() => makeStyles(colors), [colors]);
+  const { colors, fontSizes, isDark } = useTheme();
+  const styles = useMemo(() => makeStyles(colors, fontSizes), [colors, fontSizes]);
   const { getSpot, addSpot, updateSpot, settings } = useApp();
   const insets = useSafeAreaInsets();
   const editing = route.params?.spotId ? getSpot(route.params.spotId) : null;
@@ -299,7 +299,7 @@ export default function SpotFormScreen({ navigation, route }) {
   );
 }
 
-const makeStyles = (colors) =>
+const makeStyles = (colors, fontSizes) =>
   StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.surface },
     content: { padding: spacing.m },

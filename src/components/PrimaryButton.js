@@ -2,13 +2,13 @@ import { useMemo } from 'react';
 import { Pressable, StyleSheet, Text } from 'react-native';
 
 import useTheme from '../hooks/useTheme';
-import { fontSizes, radius, spacing, touch } from '../theme';
+import { radius, spacing, touch } from '../theme';
 
 // Wiederverwendbarer Button, garantiert min. 48 dp Höhe.
 // variant: 'primary' | 'secondary' | 'danger'
 export default function PrimaryButton({ title, onPress, variant = 'primary', disabled = false, style }) {
-  const { colors } = useTheme();
-  const styles = useMemo(() => makeStyles(colors), [colors]);
+  const { colors, fontSizes } = useTheme();
+  const styles = useMemo(() => makeStyles(colors, fontSizes), [colors, fontSizes]);
   return (
     <Pressable
       onPress={onPress}
@@ -28,7 +28,7 @@ export default function PrimaryButton({ title, onPress, variant = 'primary', dis
   );
 }
 
-const makeStyles = (colors) =>
+const makeStyles = (colors, fontSizes) =>
   StyleSheet.create({
     base: {
       minHeight: touch.min,

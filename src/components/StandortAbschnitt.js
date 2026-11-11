@@ -3,7 +3,7 @@ import { AccessibilityInfo, ActivityIndicator, Linking, Pressable, StyleSheet, T
 
 import useLocation from '../hooks/useLocation';
 import useTheme from '../hooks/useTheme';
-import { fontSizes, radius, spacing, touch } from '../theme';
+import { radius, spacing, touch } from '../theme';
 
 // Abschnitt «Standort» im Formular S2.
 // Der Hook useLocation fragt beim Einbinden sofort nach Berechtigung und Position. Darum steckt er
@@ -11,8 +11,8 @@ import { fontSizes, radius, spacing, touch } from '../theme';
 // (automatisch bei «Standort automatisch übernehmen» oder nach Tipp auf den Button).
 
 function Aktion({ title, accessibilityLabel, onPress }) {
-  const { colors } = useTheme();
-  const styles = useMemo(() => makeStyles(colors), [colors]);
+  const { colors, fontSizes } = useTheme();
+  const styles = useMemo(() => makeStyles(colors, fontSizes), [colors, fontSizes]);
   return (
     <Pressable
       onPress={onPress}
@@ -27,8 +27,8 @@ function Aktion({ title, accessibilityLabel, onPress }) {
 
 // status: 'idle' (noch nicht abgefragt) | 'loading' | 'denied' | 'error' | 'ready'
 function StandortAnzeige({ value, status, error, uebernommen, onErmitteln, onEinstellungen }) {
-  const { colors } = useTheme();
-  const styles = useMemo(() => makeStyles(colors), [colors]);
+  const { colors, fontSizes } = useTheme();
+  const styles = useMemo(() => makeStyles(colors, fontSizes), [colors, fontSizes]);
   const laedt = status === 'loading';
   const fehler = status === 'error';
   const denied = status === 'denied';
@@ -141,7 +141,7 @@ export default function StandortAbschnitt({ value, autoStart, onChange }) {
   return <StandortMitHook value={value} startManuell={startManuell.current} onChange={onChange} />;
 }
 
-const makeStyles = (colors) =>
+const makeStyles = (colors, fontSizes) =>
   StyleSheet.create({
     label: { fontSize: fontSizes.small, color: colors.textMuted, marginBottom: spacing.xs },
     block: { marginTop: spacing.s, gap: spacing.s },
