@@ -3,17 +3,16 @@ import { Alert, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 're
 
 import { useApp } from '../context/AppContext';
 import useTheme from '../hooks/useTheme';
-import { fontSizes, spacing, touch } from '../theme';
+import { spacing, touch } from '../theme';
 
 // S5 · Einstellungen (Tab)
 // Grundgerüst: Schalter werden sofort in AsyncStorage gespeichert, «Alle Daten löschen» mit Bestätigung.
 // TODO (Mockup S5):
 //  - Segment «Nach Distanz / Nach Bewertung»
 //  - Export als JSON über Teilen-Menü (Share API) mit Lade-Zustand
-//  - Dark Mode und grosse Schrift tatsächlich anwenden
 export default function SettingsScreen() {
-  const { colors } = useTheme();
-  const styles = useMemo(() => makeStyles(colors), [colors]);
+  const { colors, fontSizes } = useTheme();
+  const styles = useMemo(() => makeStyles(colors, fontSizes), [colors, fontSizes]);
   const { settings, updateSettings, resetAll, spots } = useApp();
 
   function confirmReset() {
@@ -25,13 +24,6 @@ export default function SettingsScreen() {
 
   return (
     <ScrollView style={styles.container}>
-      <Section title="Liste" />
-      <SwitchRow
-        label="Geschlossene Spots ausblenden"
-        value={settings.geschlosseneAusblenden}
-        onChange={(v) => updateSettings({ geschlosseneAusblenden: v })}
-      />
-
       <Section title="Erfassen" />
       <SwitchRow
         label="Standort automatisch übernehmen"
@@ -58,15 +50,15 @@ export default function SettingsScreen() {
 }
 
 function Section({ title }) {
-  const { colors } = useTheme();
-  const styles = useMemo(() => makeStyles(colors), [colors]);
+  const { colors, fontSizes } = useTheme();
+  const styles = useMemo(() => makeStyles(colors, fontSizes), [colors, fontSizes]);
   return <Text style={styles.section}>{title.toUpperCase()}</Text>;
 }
 
 // Ganze Zeile antippbar, nicht nur der kleine Switch (56 dp)
 function SwitchRow({ label, value, onChange }) {
-  const { colors } = useTheme();
-  const styles = useMemo(() => makeStyles(colors), [colors]);
+  const { colors, fontSizes } = useTheme();
+  const styles = useMemo(() => makeStyles(colors, fontSizes), [colors, fontSizes]);
   return (
     <Pressable
       onPress={() => onChange(!value)}
@@ -82,7 +74,7 @@ function SwitchRow({ label, value, onChange }) {
   );
 }
 
-const makeStyles = (colors) =>
+const makeStyles = (colors, fontSizes) =>
   StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
     section: {

@@ -2,13 +2,13 @@ import { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import useTheme from '../hooks/useTheme';
-import { fontSizes, spacing, touch } from '../theme';
+import { spacing, touch } from '../theme';
 
 // Sterne-Auswahl von 1 bis 5. Jeder Stern ist eine 48 × 48 dp Tap-Fläche mit 8 dp Abstand.
 // Der Wert steht zusätzlich als Text da («3 von 5»), damit er nicht nur an den Sternen abzulesen ist.
 export default function StarRating({ label, value, onChange }) {
-  const { colors } = useTheme();
-  const styles = useMemo(() => makeStyles(colors), [colors]);
+  const { colors, fontSizes } = useTheme();
+  const styles = useMemo(() => makeStyles(colors, fontSizes), [colors, fontSizes]);
   return (
     <View>
       <View style={styles.header}>
@@ -33,7 +33,7 @@ export default function StarRating({ label, value, onChange }) {
   );
 }
 
-const makeStyles = (colors) =>
+const makeStyles = (colors, fontSizes) =>
   StyleSheet.create({
     header: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: spacing.xs },
     label: { fontSize: fontSizes.small, color: colors.textMuted },

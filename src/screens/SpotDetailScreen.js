@@ -5,7 +5,7 @@ import { useApp } from '../context/AppContext';
 import { getCategory } from '../data/categories';
 import PrimaryButton from '../components/PrimaryButton';
 import useTheme from '../hooks/useTheme';
-import { fontSizes, spacing, touch } from '../theme';
+import { spacing, touch } from '../theme';
 
 // S4 · Detail (Stack)
 // Grundgerüst: Daten anzeigen, Favorit, Bearbeiten (Modal), Löschen mit Bestätigung.
@@ -15,8 +15,8 @@ import { fontSizes, spacing, touch } from '../theme';
 //  - Distanz zum aktuellen Standort
 //  - Toast «Zu Favoriten hinzugefügt»
 export default function SpotDetailScreen({ navigation, route }) {
-  const { colors } = useTheme();
-  const styles = useMemo(() => makeStyles(colors), [colors]);
+  const { colors, fontSizes } = useTheme();
+  const styles = useMemo(() => makeStyles(colors, fontSizes), [colors, fontSizes]);
   const { getSpot, deleteSpot, toggleFavorite } = useApp();
   const spot = getSpot(route.params?.spotId);
 
@@ -32,11 +32,11 @@ export default function SpotDetailScreen({ navigation, route }) {
           accessibilityRole="button"
           accessibilityLabel={spot.favorit ? 'Aus Favoriten entfernen' : 'Zu Favoriten hinzufügen'}
         >
-          <Text style={{ fontSize: 22, color: colors.star }}>{spot.favorit ? '★' : '☆'}</Text>
+          <Text style={{ fontSize: fontSizes.title, color: colors.star }}>{spot.favorit ? '★' : '☆'}</Text>
         </Pressable>
       ),
     });
-  }, [navigation, spot, toggleFavorite, colors]);
+  }, [navigation, spot, toggleFavorite, colors, fontSizes]);
 
   // Spot wurde gelöscht oder existiert nicht (mehr)
   if (!spot) {
@@ -87,8 +87,8 @@ export default function SpotDetailScreen({ navigation, route }) {
 }
 
 function Row({ label, value }) {
-  const { colors } = useTheme();
-  const styles = useMemo(() => makeStyles(colors), [colors]);
+  const { colors, fontSizes } = useTheme();
+  const styles = useMemo(() => makeStyles(colors, fontSizes), [colors, fontSizes]);
   return (
     <View style={styles.row}>
       <Text style={styles.label}>{label}</Text>
@@ -97,7 +97,7 @@ function Row({ label, value }) {
   );
 }
 
-const makeStyles = (colors) =>
+const makeStyles = (colors, fontSizes) =>
   StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.surface },
     content: { padding: spacing.m },

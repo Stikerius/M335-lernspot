@@ -3,13 +3,13 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { getCategory } from '../data/categories';
 import useTheme from '../hooks/useTheme';
-import { fontSizes, radius, spacing, touch } from '../theme';
+import { radius, spacing, touch } from '../theme';
 
 // Eine Zeile in der Spot-Liste (S1). Ganze Zeile antippbar, 72 dp hoch.
 // TODO (Mockup S1): Distanz und Öffnungszeit ergänzen, sobald Standort verfügbar ist.
 export default function SpotListItem({ spot, onPress }) {
-  const { colors } = useTheme();
-  const styles = useMemo(() => makeStyles(colors), [colors]);
+  const { colors, fontSizes } = useTheme();
+  const styles = useMemo(() => makeStyles(colors, fontSizes), [colors, fontSizes]);
   const cat = getCategory(spot.kategorie);
   return (
     <Pressable
@@ -36,7 +36,7 @@ export default function SpotListItem({ spot, onPress }) {
   );
 }
 
-const makeStyles = (colors) =>
+const makeStyles = (colors, fontSizes) =>
   StyleSheet.create({
     row: {
       minHeight: touch.listItem,
@@ -57,9 +57,9 @@ const makeStyles = (colors) =>
       justifyContent: 'center',
       marginRight: spacing.m,
     },
-    icon: { fontSize: 22 },
+    icon: { fontSize: fontSizes.title },
     texts: { flex: 1 },
     name: { fontSize: fontSizes.body, fontWeight: 'bold', color: colors.text },
     meta: { fontSize: fontSizes.small, color: colors.textMuted, marginTop: 2 },
-    chevron: { fontSize: 24, color: colors.textMuted, marginLeft: spacing.s },
+    chevron: { fontSize: fontSizes.large, color: colors.textMuted, marginLeft: spacing.s },
   });

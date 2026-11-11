@@ -7,7 +7,7 @@ import FilterChips from '../components/FilterChips';
 import PrimaryButton from '../components/PrimaryButton';
 import useTheme from '../hooks/useTheme';
 import { filterSpots } from '../utils/filterSpots';
-import { fontSizes, radius, spacing, touch } from '../theme';
+import { radius, spacing, touch } from '../theme';
 
 // S1 · Spots (Startscreen)
 // Suchfeld (Name) und Filter-Chips wirken zusammen; die Chips werden im AppContext gespeichert,
@@ -15,8 +15,8 @@ import { fontSizes, radius, spacing, touch } from '../theme';
 // TODO (Mockup S1):
 //  - Sortierung nach Distanz (expo-location + utils/distance.js), Fallback alphabetisch
 export default function SpotsListScreen({ navigation }) {
-  const { colors, isDark } = useTheme();
-  const styles = useMemo(() => makeStyles(colors), [colors]);
+  const { colors, fontSizes, isDark } = useTheme();
+  const styles = useMemo(() => makeStyles(colors, fontSizes), [colors, fontSizes]);
   const { spots, loading, filter, updateFilter } = useApp();
   const [query, setQuery] = useState('');
 
@@ -116,7 +116,7 @@ export default function SpotsListScreen({ navigation }) {
   );
 }
 
-const makeStyles = (colors) =>
+const makeStyles = (colors, fontSizes) =>
   StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
     center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background },

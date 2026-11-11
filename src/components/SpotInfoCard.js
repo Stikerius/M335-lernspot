@@ -1,13 +1,17 @@
+import { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import PrimaryButton from './PrimaryButton';
 import { getCategory } from '../data/categories';
 import { formatDistance } from '../utils/distance';
-import { colors, fontSizes, radius, spacing, touch } from '../theme';
+import useTheme from '../hooks/useTheme';
+import { radius, spacing, touch } from '../theme';
 
 // Infokarte unten auf der Karte (S3) nach Tap auf einen Pin.
 // Zeigt dieselben Kurzinfos wie die Listenzeile, «Details ›» über die ganze Breite.
 export default function SpotInfoCard({ spot, distance, onDetails, onClose }) {
+  const { colors, fontSizes } = useTheme();
+  const styles = useMemo(() => makeStyles(colors, fontSizes), [colors, fontSizes]);
   const cat = getCategory(spot.kategorie);
   const ruhe = '★'.repeat(spot.ruhe) + '☆'.repeat(5 - spot.ruhe);
   const ausstattung = [spot.wlan && '📶 WLAN', spot.steckdosen && '🔌 Steckdose'].filter(Boolean).join(' · ');
@@ -46,42 +50,43 @@ export default function SpotInfoCard({ spot, distance, onDetails, onClose }) {
   );
 }
 
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.l,
-    padding: spacing.m,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
-    elevation: 6,
-    shadowColor: colors.text,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-  },
-  header: { flexDirection: 'row', alignItems: 'center', minHeight: touch.min },
-  thumb: {
-    width: touch.min,
-    height: touch.min,
-    borderRadius: radius.m,
-    backgroundColor: colors.primaryLight,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: spacing.m,
-  },
-  icon: { fontSize: fontSizes.large },
-  texts: { flex: 1 },
-  name: { fontSize: fontSizes.body, fontWeight: 'bold', color: colors.text },
-  meta: { fontSize: fontSizes.small, color: colors.textMuted, marginTop: spacing.xs / 2 },
-  close: {
-    width: touch.min,
-    height: touch.min,
-    marginLeft: spacing.s,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: radius.pill,
-  },
-  pressed: { backgroundColor: colors.primaryLight },
-  closeLabel: { fontSize: fontSizes.title, color: colors.textMuted },
-  details: { marginTop: spacing.s },
-});
+const makeStyles = (colors, fontSizes) =>
+  StyleSheet.create({
+    card: {
+      backgroundColor: colors.surface,
+      borderRadius: radius.l,
+      padding: spacing.m,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.border,
+      elevation: 6,
+      shadowColor: colors.text,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.2,
+      shadowRadius: 6,
+    },
+    header: { flexDirection: 'row', alignItems: 'center', minHeight: touch.min },
+    thumb: {
+      width: touch.min,
+      height: touch.min,
+      borderRadius: radius.m,
+      backgroundColor: colors.primaryLight,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginRight: spacing.m,
+    },
+    icon: { fontSize: fontSizes.large },
+    texts: { flex: 1 },
+    name: { fontSize: fontSizes.body, fontWeight: 'bold', color: colors.text },
+    meta: { fontSize: fontSizes.small, color: colors.textMuted, marginTop: spacing.xs / 2 },
+    close: {
+      width: touch.min,
+      height: touch.min,
+      marginLeft: spacing.s,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderRadius: radius.pill,
+    },
+    pressed: { backgroundColor: colors.primaryLight },
+    closeLabel: { fontSize: fontSizes.title, color: colors.textMuted },
+    details: { marginTop: spacing.s },
+  });

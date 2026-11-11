@@ -14,12 +14,12 @@ import useTheme from '../hooks/useTheme';
 const Stack = createNativeStackNavigator();
 
 export default function RootNavigator() {
-  const { colors } = useTheme();
+  const { colors, fontSizes } = useTheme();
   return (
     <Stack.Navigator
       screenOptions={{
         headerTintColor: colors.primary,
-        headerTitleStyle: { color: colors.text },
+        headerTitleStyle: { color: colors.text, fontSize: fontSizes.body },
       }}
     >
       <Stack.Screen

@@ -2,11 +2,10 @@ import { useMemo } from 'react';
 import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import useTheme from '../hooks/useTheme';
-import { fontSizes } from '../theme';
 
 function Statistik({ zahl, label }) {
-  const { colors } = useTheme();
-  const styles = useMemo(() => makeStyles(colors), [colors]);
+  const { colors, fontSizes } = useTheme();
+  const styles = useMemo(() => makeStyles(colors, fontSizes), [colors, fontSizes]);
   return (
     <View style={styles.statistik}>
       <Text style={styles.zahl}>{zahl}</Text>
@@ -16,8 +15,8 @@ function Statistik({ zahl, label }) {
 }
 
 function ProfilKarte({ bild, name, rolle, beschreibung, beitraege, follower, folgt }) {
-  const { colors } = useTheme();
-  const styles = useMemo(() => makeStyles(colors), [colors]);
+  const { colors, fontSizes } = useTheme();
+  const styles = useMemo(() => makeStyles(colors, fontSizes), [colors, fontSizes]);
   return (
     <View style={styles.karte}>
       <Image source={{ uri: bild }} style={styles.bild} accessibilityLabel={`Profilbild von ${name}`} />
@@ -35,8 +34,8 @@ function ProfilKarte({ bild, name, rolle, beschreibung, beitraege, follower, fol
 
 // Tag-1-Aufgabe: noch nicht in die Navigation eingebunden
 export default function ProfilScreen() {
-  const { colors } = useTheme();
-  const styles = useMemo(() => makeStyles(colors), [colors]);
+  const { colors, fontSizes } = useTheme();
+  const styles = useMemo(() => makeStyles(colors, fontSizes), [colors, fontSizes]);
   return (
     <ScrollView style={styles.scroll} contentContainerStyle={styles.inhalt}>
       <ProfilKarte
@@ -61,7 +60,7 @@ export default function ProfilScreen() {
   );
 }
 
-const makeStyles = (colors) =>
+const makeStyles = (colors, fontSizes) =>
   StyleSheet.create({
     scroll: {
       flex: 1,

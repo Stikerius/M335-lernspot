@@ -13,7 +13,6 @@ export const KEYS = {
 
 export const DEFAULT_SETTINGS = {
   sortierung: 'distanz',          // 'distanz' | 'bewertung'
-  geschlosseneAusblenden: false,
   autoStandort: true,
   darkMode: false,
   grosseSchrift: false,
