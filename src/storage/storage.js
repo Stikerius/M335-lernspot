@@ -13,6 +13,7 @@ export const KEYS = {
 
 export const DEFAULT_SETTINGS = {
   sortierung: 'distanz',          // 'distanz' | 'bewertung'
+  suchradius: null,               // Meter (1000 | 5000 | 10000), null = «Alle»
   autoStandort: true,
   darkMode: false,
   grosseSchrift: false,
@@ -41,10 +42,16 @@ async function writeJson(key, value) {
 export const loadSpots = () => readJson(KEYS.spots, []);
 export const saveSpots = (spots) => writeJson(KEYS.spots, spots);
 
-export const loadSettings = async () => ({
-  ...DEFAULT_SETTINGS,
-  ...(await readJson(KEYS.settings, {})),
-});
+const RADIUS_WERTE = [1000, 5000, 10000];
+
+// Gespeicherte Einstellungen absichern: unbekannte Werte fallen auf den Standard zurück
+function normalizeSettings(raw) {
+  const settings = { ...DEFAULT_SETTINGS, ...raw };
+  if (!RADIUS_WERTE.includes(settings.suchradius)) settings.suchradius = null;
+  return settings;
+}
+
+export const loadSettings = async () => normalizeSettings(await readJson(KEYS.settings, {}));
 export const saveSettings = (settings) => writeJson(KEYS.settings, settings);
 
 export const loadFilter = () => readJson(KEYS.filter, []);

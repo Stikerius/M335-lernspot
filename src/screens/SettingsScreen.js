@@ -3,7 +3,8 @@ import { Alert, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 're
 
 import { useApp } from '../context/AppContext';
 import useTheme from '../hooks/useTheme';
-import { spacing, touch } from '../theme';
+import { RADIUS_OPTIONS } from '../utils/filterSpots';
+import { radius, spacing, touch } from '../theme';
 
 // S5 · Einstellungen (Tab)
 // Grundgerüst: Schalter werden sofort in AsyncStorage gespeichert, «Alle Daten löschen» mit Bestätigung.
@@ -29,6 +30,15 @@ export default function SettingsScreen() {
         label="Standort automatisch übernehmen"
         value={settings.autoStandort}
         onChange={(v) => updateSettings({ autoStandort: v })}
+      />
+
+      <Section title="Karte" />
+      <SegmentRow
+        label="Suchradius"
+        hint="Die Karte zeigt nur Spots in diesem Umkreis um deinen Standort."
+        options={RADIUS_OPTIONS}
+        value={settings.suchradius}
+        onChange={(v) => updateSettings({ suchradius: v })}
       />
 
       <Section title="Darstellung" />
@@ -74,6 +84,42 @@ function SwitchRow({ label, value, onChange }) {
   );
 }
 
+// Auswahl aus wenigen festen Werten. Die Zeile ist mind. 56 dp hoch, jedes Segment 48 dp;
+// das gewählte Segment ist zusätzlich mit «✓» markiert (Info nicht nur über Farbe).
+function SegmentRow({ label, hint, options, value, onChange }) {
+  const { colors, fontSizes } = useTheme();
+  const styles = useMemo(() => makeStyles(colors, fontSizes), [colors, fontSizes]);
+  return (
+    <View style={styles.segmentRow}>
+      <Text style={styles.segmentTitle}>{label}</Text>
+      {hint ? <Text style={styles.hint}>{hint}</Text> : null}
+      <View style={styles.segment} accessibilityRole="radiogroup" accessibilityLabel={label}>
+        {options.map((o) => {
+          const active = o.value === value;
+          return (
+            <Pressable
+              key={String(o.value)}
+              onPress={() => onChange(o.value)}
+              accessibilityRole="radio"
+              accessibilityLabel={`${label}: ${o.label}`}
+              accessibilityState={{ checked: active, selected: active }}
+              style={({ pressed }) => [
+                styles.segmentItem,
+                active && styles.segmentItemActive,
+                pressed && !active && styles.pressed,
+              ]}
+            >
+              <Text style={[styles.segmentLabel, active && styles.segmentLabelActive]}>
+                {active ? `✓ ${o.label}` : o.label}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
+    </View>
+  );
+}
+
 const makeStyles = (colors, fontSizes) =>
   StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
@@ -97,5 +143,31 @@ const makeStyles = (colors, fontSizes) =>
     },
     pressed: { backgroundColor: colors.primaryLight },
     rowLabel: { fontSize: fontSizes.body, color: colors.text, flex: 1, marginRight: spacing.m },
+    segmentRow: {
+      minHeight: touch.settingsRow,
+      paddingHorizontal: spacing.m,
+      paddingVertical: spacing.s,
+      gap: spacing.s,
+      backgroundColor: colors.surface,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: colors.border,
+    },
+    segmentTitle: { fontSize: fontSizes.body, color: colors.text },
+    hint: { fontSize: fontSizes.small, color: colors.textMuted },
+    segment: { flexDirection: 'row', gap: spacing.s },
+    segmentItem: {
+      flex: 1,
+      minHeight: touch.min,
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingHorizontal: spacing.xs,
+      borderRadius: radius.m,
+      borderWidth: 1.5,
+      borderColor: colors.border,
+      backgroundColor: colors.surface,
+    },
+    segmentItemActive: { backgroundColor: colors.primary, borderColor: colors.primary },
+    segmentLabel: { fontSize: fontSizes.body, color: colors.text },
+    segmentLabelActive: { color: colors.onPrimary, fontWeight: 'bold' },
     footer: { textAlign: 'center', color: colors.textMuted, fontSize: fontSizes.small, padding: spacing.l },
   });

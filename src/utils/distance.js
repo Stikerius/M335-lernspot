@@ -16,3 +16,13 @@ export function formatDistance(meters) {
   if (meters < 1000) return `${Math.round(meters / 10) * 10} m`;
   return `${(meters / 1000).toFixed(1)} km`;
 }
+
+export function hasCoords(spot) {
+  return typeof spot?.lat === 'number' && typeof spot?.lng === 'number';
+}
+
+// Distanz vom aktuellen Standort zu einem Spot; null, wenn eins von beiden fehlt
+export function distanceToSpot(coords, spot) {
+  if (!coords || !hasCoords(spot)) return null;
+  return distanceInMeters(coords.lat, coords.lng, spot.lat, spot.lng);
+}

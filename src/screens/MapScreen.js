@@ -15,7 +15,8 @@ import { useApp } from '../context/AppContext';
 import { useLocation } from '../hooks/useLocation';
 import PrimaryButton from '../components/PrimaryButton';
 import SpotInfoCard from '../components/SpotInfoCard';
-import { distanceInMeters } from '../utils/distance';
+import { distanceToSpot, hasCoords } from '../utils/distance';
+import { filterByRadius, radiusLabel } from '../utils/filterSpots';
 import { isOnline } from '../utils/network';
 import useTheme from '../hooks/useTheme';
 import { radius, spacing, touch } from '../theme';
@@ -23,14 +24,22 @@ import { radius, spacing, touch } from '../theme';
 // S3 · Karte (Special Feature GPS)
 // Alle Spots als Pins, eigener Standort als «Du», Zentrier-Button 48 × 48,
 // Tipp auf Pin → Infokarte unten → «Details ›» → S4.
-// Sonderzustände: Laden, keine Berechtigung, Standortfehler, kein Netz, keine Spots mit Standort.
+// Mit Standort zeigt die Karte nur Spots im Suchradius aus den Einstellungen, ohne Standort alle.
+// Sonderzustände: Laden, Standort aus (Berechtigung/Dienste), Standortfehler, kein Netz,
+// keine Spots mit Standort, keine Spots im Radius.
 
 // Fallback, wenn weder Standort noch Spots mit Koordinaten vorhanden sind (Winterthur)
 const FALLBACK_REGION = { latitude: 47.4997, longitude: 8.7241, latitudeDelta: 0.05, longitudeDelta: 0.05 };
 const USER_DELTA = 0.02;
+const METER_PRO_GRAD = 111320;
 
-function hasCoords(spot) {
-  return typeof spot.lat === 'number' && typeof spot.lng === 'number';
+// «Ohne Standort weiter» gilt für die ganze App-Sitzung, auch wenn der Tab neu aufgebaut wird
+let standortHinweisAusgeblendet = false;
+
+// Ausschnitt um den Standort, gross genug, dass der ganze Suchradius sichtbar ist
+function regionAround(coords, radius) {
+  const delta = radius ? Math.max(USER_DELTA, (radius * 2.4) / METER_PRO_GRAD) : USER_DELTA;
+  return { latitude: coords.lat, longitude: coords.lng, latitudeDelta: delta, longitudeDelta: delta };
 }
 
 // Startausschnitt so wählen, dass alle Spots sichtbar sind
@@ -81,13 +90,14 @@ function UserMarker({ coords }) {
 export default function MapScreen({ navigation }) {
   const { colors, fontSizes } = useTheme();
   const styles = useMemo(() => makeStyles(colors, fontSizes), [colors, fontSizes]);
-  const { spots, loading } = useApp();
-  const { coords, status, error, refresh } = useLocation();
+  const { spots, loading, settings } = useApp();
+  const { coords, status, error, servicesOff, refresh } = useLocation();
   const mapRef = useRef(null);
 
   const [selectedId, setSelectedId] = useState(null);
   const [online, setOnline] = useState(true);
   const [checkingNet, setCheckingNet] = useState(false);
+  const [hinweisAus, setHinweisAus] = useState(standortHinweisAusgeblendet);
   const userMoved = useRef(false);
   const centeredOnce = useRef(false);
 
@@ -97,8 +107,16 @@ export default function MapScreen({ navigation }) {
   const initialRegion = useRef(null);
   if (!initialRegion.current && !loading) initialRegion.current = regionForSpots(spotsWithCoords);
 
-  // Gelöschte Spots: Infokarte nicht mehr anzeigen
-  const selected = spotsWithCoords.find((s) => s.id === selectedId) ?? null;
+  // Radius nur mit gültigem Standort anwenden, sonst würde die Karte grundlos leer
+  const suchradius = settings.suchradius ?? null;
+  const radiusActive = status === 'ready' && !!coords && suchradius != null;
+  const visibleSpots = useMemo(
+    () => (radiusActive ? filterByRadius(spotsWithCoords, coords, suchradius) : spotsWithCoords),
+    [radiusActive, spotsWithCoords, coords, suchradius]
+  );
+
+  // Gelöschte oder ausgefilterte Spots: Infokarte nicht mehr anzeigen
+  const selected = visibleSpots.find((s) => s.id === selectedId) ?? null;
 
   const checkNetwork = useCallback(async () => {
     setCheckingNet(true);
@@ -123,11 +141,8 @@ export default function MapScreen({ navigation }) {
 
   const centerOnUser = useCallback(() => {
     if (!coords || !mapRef.current) return;
-    mapRef.current.animateToRegion(
-      { latitude: coords.lat, longitude: coords.lng, latitudeDelta: USER_DELTA, longitudeDelta: USER_DELTA },
-      500
-    );
-  }, [coords]);
+    mapRef.current.animateToRegion(regionAround(coords, suchradius), 500);
+  }, [coords, suchradius]);
 
   // Einmal automatisch zentrieren, sobald der Standort da ist – aber nur,
   // wenn der Nutzer die Karte noch nicht selbst verschoben hat (Steuerbarkeit)
@@ -149,6 +164,11 @@ export default function MapScreen({ navigation }) {
     setSelectedId(null);
   };
 
+  const ohneStandortWeiter = () => {
+    standortHinweisAusgeblendet = true;
+    setHinweisAus(true);
+  };
+
   const openDetails = () => {
     if (selected) navigation.navigate('SpotDetail', { spotId: selected.id });
   };
@@ -162,8 +182,11 @@ export default function MapScreen({ navigation }) {
     );
   }
 
-  const distance = selected && coords ? distanceInMeters(coords.lat, coords.lng, selected.lat, selected.lng) : null;
+  const distance = selected ? distanceToSpot(coords, selected) : null;
   const locating = status === 'loading';
+  // Berechtigung verweigert und ausgeschaltete Standortdienste haben dieselbe Lösung (Einstellungen)
+  const standortAus = status === 'denied' || (status === 'error' && servicesOff);
+  const radiusText = radiusLabel(suchradius);
 
   return (
     <View style={styles.container}>
@@ -182,7 +205,7 @@ export default function MapScreen({ navigation }) {
         moveOnMarkerPress={false}
         accessibilityLabel="Karte mit allen Spots"
       >
-        {spotsWithCoords.map((spot) => (
+        {visibleSpots.map((spot) => (
           <Marker
             key={spot.id}
             coordinate={{ latitude: spot.lat, longitude: spot.lng }}
@@ -199,17 +222,32 @@ export default function MapScreen({ navigation }) {
 
       {/* Hinweise oben: ersetzen nichts, die Pins bleiben sichtbar (keine Sackgasse) */}
       <View style={styles.banners} pointerEvents="box-none">
-        {status === 'denied' ? (
+        {standortAus && !hinweisAus ? (
           <View style={styles.banner}>
-            <Text style={styles.bannerTitle}>⚠ Keine Standort-Berechtigung</Text>
+            <Text style={styles.bannerTitle}>⚠ Standort ist ausgeschaltet</Text>
             <Text style={styles.bannerText}>
-              Standortzugriff ist deaktiviert. Deine Spots werden angezeigt, aber «Du» und die Distanzen fehlen.
+              {status === 'denied'
+                ? 'LernSpots darf deinen Standort nicht verwenden.'
+                : 'Die Standortdienste deines Geräts sind ausgeschaltet.'}{' '}
+              Alle Spots werden angezeigt, aber «Du», die Distanzen und der Suchradius fehlen.
             </Text>
-            <PrimaryButton title="Einstellungen öffnen" onPress={() => Linking.openSettings()} style={styles.bannerButton} />
+            <View style={styles.bannerRow}>
+              <PrimaryButton
+                title="Einstellungen öffnen"
+                onPress={() => Linking.openSettings()}
+                style={[styles.bannerButton, styles.flex]}
+              />
+              <PrimaryButton
+                title="Ohne Standort weiter"
+                variant="secondary"
+                onPress={ohneStandortWeiter}
+                style={[styles.bannerButton, styles.flex]}
+              />
+            </View>
           </View>
         ) : null}
 
-        {status === 'error' ? (
+        {status === 'error' && !servicesOff ? (
           <View style={styles.banner}>
             <Text style={styles.bannerTitle}>⚠ Standort nicht verfügbar</Text>
             <Text style={styles.bannerText}>{error}</Text>
@@ -256,6 +294,25 @@ export default function MapScreen({ navigation }) {
                 : 'Deine Spots haben keinen Standort gespeichert. Du findest sie in der Liste.'}
             </Text>
             <PrimaryButton title="Liste anzeigen" variant="secondary" onPress={() => navigation.navigate('Spots')} style={styles.bannerButton} />
+          </View>
+        ) : radiusActive && visibleSpots.length === 0 ? (
+          <View style={styles.banner}>
+            <Text style={styles.bannerTitle}>Keine Spots im Umkreis von {radiusText}</Text>
+            <Text style={styles.bannerText}>
+              In deiner Nähe ist noch kein Spot gespeichert. Vergrössere den Suchradius, um weiter entfernte Spots zu sehen.
+            </Text>
+            <PrimaryButton
+              title="Radius ändern"
+              variant="secondary"
+              onPress={() => navigation.navigate('Settings')}
+              style={styles.bannerButton}
+            />
+          </View>
+        ) : radiusActive ? (
+          <View style={styles.pill} accessibilityLiveRegion="polite">
+            <Text style={styles.pillText}>
+              {visibleSpots.length === 1 ? '1 Spot' : `${visibleSpots.length} Spots`} im Umkreis von {radiusText}
+            </Text>
           </View>
         ) : missingCoords > 0 && !selected ? (
           <View style={styles.pill}>

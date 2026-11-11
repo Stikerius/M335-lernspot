@@ -7,6 +7,7 @@ import * as Location from 'expo-location';
 //   coords   { lat, lng, accuracy } | null   accuracy in Metern (für «Genauigkeit ±12 m»)
 //   status   'loading' | 'denied' | 'error' | 'ready'
 //   error    verständliche Fehlermeldung auf Deutsch | null
+//   servicesOff  true, wenn die Standortdienste des Geräts ausgeschaltet sind (status ist dann 'error')
 //   refresh  () => Promise   Berechtigung erneut prüfen und Position neu ermitteln
 //
 // Beispiel:
@@ -44,6 +45,7 @@ export function useLocation() {
   const [coords, setCoords] = useState(null);
   const [status, setStatus] = useState('loading');
   const [error, setError] = useState(null);
+  const [servicesOff, setServicesOff] = useState(false);
 
   // Verhindert setState nach dem Verlassen des Screens und doppelte Abfragen
   const mounted = useRef(true);
@@ -55,6 +57,7 @@ export function useLocation() {
     // Alte Position bleibt sichtbar, während neu gesucht wird
     setStatus('loading');
     setError(null);
+    setServicesOff(false);
 
     try {
       const { status: permission } = await Location.requestForegroundPermissionsAsync();
@@ -69,6 +72,8 @@ export function useLocation() {
 
       const servicesOn = await Location.hasServicesEnabledAsync();
       if (!servicesOn) {
+        // Eigener Zustand, damit die Karte dieselbe Hilfe wie bei verweigerter Berechtigung anbieten kann
+        if (mounted.current) setServicesOff(true);
         throw userError('Die Standortdienste sind ausgeschaltet. Bitte in den Systemeinstellungen einschalten.');
       }
 
@@ -107,7 +112,7 @@ export function useLocation() {
     };
   }, [refresh]);
 
-  return { coords, status, error, refresh };
+  return { coords, status, error, servicesOff, refresh };
 }
 
 export default useLocation;
