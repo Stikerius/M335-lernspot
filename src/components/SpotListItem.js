@@ -2,20 +2,23 @@ import { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { getCategory } from '../data/categories';
+import { formatDistance } from '../utils/distance';
 import useTheme from '../hooks/useTheme';
 import { radius, spacing, touch } from '../theme';
 
 // Eine Zeile in der Spot-Liste (S1). Ganze Zeile antippbar, 72 dp hoch.
-// TODO (Mockup S1): Distanz und Öffnungszeit ergänzen, sobald Standort verfügbar ist.
-export default function SpotListItem({ spot, onPress }) {
+// distance in Metern; ohne Standort (null) wird keine Distanz angezeigt.
+// TODO (Mockup S1): Öffnungszeit ergänzen.
+export default function SpotListItem({ spot, distance = null, onPress }) {
   const { colors, fontSizes } = useTheme();
   const styles = useMemo(() => makeStyles(colors, fontSizes), [colors, fontSizes]);
   const cat = getCategory(spot.kategorie);
+  const distanzText = distance != null ? `${formatDistance(distance)} entfernt` : null;
   return (
     <Pressable
       onPress={onPress}
       accessibilityRole="button"
-      accessibilityLabel={`${spot.name} öffnen`}
+      accessibilityLabel={distanzText ? `${spot.name}, ${distanzText}, öffnen` : `${spot.name} öffnen`}
       style={({ pressed }) => [styles.row, pressed && styles.pressed]}
     >
       <View style={styles.thumb}>
@@ -25,6 +28,11 @@ export default function SpotListItem({ spot, onPress }) {
         <Text style={styles.name} numberOfLines={1}>
           {spot.favorit ? '★ ' : ''}{spot.name}
         </Text>
+        {distanzText ? (
+          <Text style={styles.distance} numberOfLines={1}>
+            {distanzText}
+          </Text>
+        ) : null}
         <Text style={styles.meta} numberOfLines={1}>
           Ruhe {'★'.repeat(spot.ruhe)}{'☆'.repeat(5 - spot.ruhe)}
           {spot.wlan ? ' · 📶' : ''}
@@ -60,6 +68,7 @@ const makeStyles = (colors, fontSizes) =>
     icon: { fontSize: fontSizes.title },
     texts: { flex: 1 },
     name: { fontSize: fontSizes.body, fontWeight: 'bold', color: colors.text },
+    distance: { fontSize: fontSizes.small, color: colors.primary, fontWeight: 'bold', marginTop: 2 },
     meta: { fontSize: fontSizes.small, color: colors.textMuted, marginTop: 2 },
     chevron: { fontSize: fontSizes.large, color: colors.textMuted, marginLeft: spacing.s },
   });

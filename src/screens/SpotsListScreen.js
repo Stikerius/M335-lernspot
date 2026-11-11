@@ -6,22 +6,31 @@ import SpotListItem from '../components/SpotListItem';
 import FilterChips from '../components/FilterChips';
 import PrimaryButton from '../components/PrimaryButton';
 import useTheme from '../hooks/useTheme';
+import { useLocation } from '../hooks/useLocation';
 import { filterSpots } from '../utils/filterSpots';
+import { sortSpots } from '../utils/sortSpots';
+import { distanceToSpot } from '../utils/distance';
 import { radius, spacing, touch } from '../theme';
 
 // S1 · Spots (Startscreen)
 // Suchfeld (Name) und Filter-Chips wirken zusammen; die Chips werden im AppContext gespeichert,
 // der Suchtext nicht. Tap → Detail, FAB → Formular (Modal).
-// TODO (Mockup S1):
-//  - Sortierung nach Distanz (expo-location + utils/distance.js), Fallback alphabetisch
+// Sortierung gemäss Einstellung; ohne Standort alphabetisch. Die Liste ist schon während der
+// Standortsuche sichtbar und sortiert sich neu, sobald die Position da ist.
 export default function SpotsListScreen({ navigation }) {
   const { colors, fontSizes, isDark } = useTheme();
   const styles = useMemo(() => makeStyles(colors, fontSizes), [colors, fontSizes]);
-  const { spots, loading, filter, updateFilter } = useApp();
+  const { spots, loading, filter, updateFilter, settings } = useApp();
+  const { coords, status } = useLocation();
   const [query, setQuery] = useState('');
 
-  // Reihenfolge der Spots bleibt unverändert, gefiltert wird nur
-  const visible = useMemo(() => filterSpots(spots, { query, filter }), [spots, query, filter]);
+  // Zuerst filtern (weniger zu sortieren), dann sortieren
+  const visible = useMemo(
+    () => sortSpots(filterSpots(spots, { query, filter }), coords, settings.sortierung),
+    [spots, query, filter, coords, settings.sortierung]
+  );
+  const locating = status === 'loading' && !coords;
+  const ohneStandort = !coords && (status === 'denied' || status === 'error');
 
   const resetFilter = () => {
     setQuery('');
@@ -71,9 +80,19 @@ export default function SpotsListScreen({ navigation }) {
 
           <FilterChips value={filter} onChange={updateFilter} />
 
-          <Text style={styles.count} accessibilityLiveRegion="polite">
-            {visible.length === 1 ? '1 Spot' : `${visible.length} Spots`}
-          </Text>
+          <View style={styles.countRow}>
+            <Text style={styles.count} accessibilityLiveRegion="polite">
+              {visible.length === 1 ? '1 Spot' : `${visible.length} Spots`}
+            </Text>
+            {locating ? (
+              <View style={styles.status}>
+                <ActivityIndicator size="small" color={colors.primary} />
+                <Text style={styles.statusText}>Standort wird ermittelt …</Text>
+              </View>
+            ) : ohneStandort ? (
+              <Text style={styles.statusText}>Ohne Standort – alphabetisch sortiert</Text>
+            ) : null}
+          </View>
         </View>
       ) : null}
 
@@ -84,6 +103,7 @@ export default function SpotsListScreen({ navigation }) {
         renderItem={({ item }) => (
           <SpotListItem
             spot={item}
+            distance={distanceToSpot(coords, item)}
             onPress={() => navigation.navigate('SpotDetail', { spotId: item.id })}
           />
         )}
@@ -155,12 +175,18 @@ const makeStyles = (colors, fontSizes) =>
     },
     pressed: { backgroundColor: colors.primaryLight },
     clearLabel: { fontSize: fontSizes.title, color: colors.textMuted },
-    count: {
+    countRow: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: spacing.s,
       paddingHorizontal: spacing.m,
       paddingBottom: spacing.s,
-      fontSize: fontSizes.small,
-      color: colors.textMuted,
     },
+    count: { fontSize: fontSizes.small, color: colors.textMuted },
+    status: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
+    statusText: { fontSize: fontSizes.small, color: colors.textMuted },
 
     empty: {
       textAlign: 'center',

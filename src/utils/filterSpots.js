@@ -1,3 +1,5 @@
+import { distanceToSpot } from './distance';
+
 // Filterlogik für die Spot-Liste (S1), getrennt vom Screen, damit sie ohne Gerät prüfbar ist.
 // Chip-Zustand = Array der aktiven Schlüssel, leeres Array bedeutet «Alle».
 
@@ -35,4 +37,26 @@ export function filterSpots(spots, { query = '', filter = [] } = {}) {
   return spots.filter(
     (spot) => (q === '' || normalize(spot.name).includes(q)) && tests.every((test) => test(spot))
   );
+}
+
+// Suchradius für die Karte (S3), Wert in Metern; null = «Alle»
+export const RADIUS_OPTIONS = [
+  { value: 1000, label: '1 km' },
+  { value: 5000, label: '5 km' },
+  { value: 10000, label: '10 km' },
+  { value: null, label: 'Alle' },
+];
+
+export function radiusLabel(radius) {
+  return RADIUS_OPTIONS.find((o) => o.value === radius)?.label ?? 'Alle';
+}
+
+// Nur Spots im Umkreis behalten. Ohne Radius oder ohne Standort bleibt die Liste unverändert,
+// Spots ohne Koordinaten fallen bei aktivem Radius raus (Distanz unbekannt).
+export function filterByRadius(spots, coords, radius) {
+  if (radius == null || !coords) return spots;
+  return spots.filter((spot) => {
+    const d = distanceToSpot(coords, spot);
+    return d != null && d <= radius;
+  });
 }

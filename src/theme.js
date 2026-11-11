@@ -55,6 +55,11 @@ export const touch = {
   tabBar: 56,
 };
 
+// Feste Bauteil-Grössen
+export const sizes = {
+  miniMap: 160, // Mini-Karte im Detail (S4)
+};
+
 export const fontSizes = {
   small: 12,   // Minimum
   body: 16,
