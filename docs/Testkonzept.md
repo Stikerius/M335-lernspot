@@ -57,6 +57,21 @@ Jeder Testfall wird auf beiden Geräten durchgeführt. Die Spalten Ergebnis iPho
 | T28 | Dunkles Design bleibt | Dunkles Design einschalten und die App vollständig schliessen und neu starten. Danach ausschalten. | Nach dem Neustart ist das dunkle Design noch aktiv. Nach dem Ausschalten wechselt die App sofort zurück auf das helle Design. | | | |
 | T29 | Leerer Zustand | In den Einstellungen "Alle Daten löschen" wählen und in der Rückfrage mit "Löschen" bestätigen. Tab Spots öffnen. | Die Liste zeigt den Hinweis "Noch keine Spots gespeichert." mit der Aufforderung, den ersten Lernort zu erfassen. Es erscheinen keine Beispiel Spots mehr. | | | |
 | T30 | Tastatur im Formular | Neues Formular öffnen und in das Feld Notiz tippen, sodass die Tastatur erscheint. | Das Feld Notiz bleibt sichtbar und der Button "Speichern" ist erreichbar, entweder über dem Inhalt oder nach dem Ausblenden der Tastatur durch Wischen. | | | |
+| T31 | Karte Suchradius ändern | In den Einstellungen einen kleineren Suchradius wählen, zum Beispiel 1 km. Danach den Tab Karte öffnen. | Die Karte zeigt nur Pins von Spots innerhalb des Radius. Spots ausserhalb sind nicht mehr zu sehen. Nach dem Zurückstellen auf einen grossen Radius erscheinen sie wieder. | | | |
+| T32 | Karte keine Spots im Radius | Den Suchradius auf den kleinsten Wert stellen und an einem Ort testen, an dem kein Spot in der Nähe liegt. Tab Karte öffnen. | Es erscheint ein Hinweis, dass im Radius keine Spots liegen, mit dem Button "Radius ändern". Der Button führt zu den Einstellungen. | | | |
+| T33 | Karte Standort ausgeschaltet | Auf dem Gerät die Standortdienste ausschalten. Tab Karte öffnen. | Es erscheint die Meldung "Standort ist ausgeschaltet" mit den Buttons "Einstellungen öffnen" und "Ohne Standort weiter". | | | |
+| T34 | Karte Einstellungen öffnen | Bei ausgeschaltetem Standort auf "Einstellungen öffnen" tippen. | Die Einstellungen des Geräts öffnen sich. Nach dem Einschalten der Standortdienste und der Rückkehr in die App findet die Karte den Standort. | | | |
+| T35 | Karte ohne Standort weiter | Bei ausgeschaltetem Standort auf "Ohne Standort weiter" tippen. | Die Meldung verschwindet. Die Karte zeigt alle Spots mit Standort ohne Radius und ohne eigenen Standort. | | | |
+| T36 | Liste Distanz pro Spot | Standortberechtigung erlauben. Tab Spots öffnen. | Jede Zeile mit Standort zeigt die Distanz in der Form "… m entfernt" oder "… km entfernt". | | | |
+| T37 | Liste Sortierung Nächste | In der Liste die Sortierung "Nächste" wählen. | Der nächste Spot steht oben, die Distanzen steigen nach unten an. | | | |
+| T38 | Liste Sortierung Beste Ruhe | In der Liste die Sortierung "Beste Ruhe" wählen. | Spots mit der besten Ruhe Bewertung stehen oben, die Bewertung sinkt nach unten. | | | |
+| T39 | Liste Sortierung Neueste | In der Liste die Sortierung "Neueste" wählen. Vorher einen neuen Spot anlegen. | Der zuletzt angelegte Spot steht oben. | | | |
+| T40 | Liste ohne Standort | Standortberechtigung verweigern oder Standortdienste ausschalten. Tab Spots öffnen. | Die Liste ist alphabetisch nach Name sortiert. Es wird keine Distanz angezeigt. Die App meldet keinen Fehler. | | | |
+| T41 | Sortierung und Radius bleiben | Eine Sortierung und einen Suchradius wählen, die vom Standard abweichen. App vollständig schliessen und neu starten. | Sortierung und Radius sind nach dem Neustart unverändert. | | | |
+| T42 | Detail Distanz | Einen Spot mit Standort öffnen, bei erlaubtem Standort. | Unter dem Titel steht die Distanz zum Spot, zum Beispiel "350 m entfernt". | | | |
+| T43 | Detail Mini-Karte | Einen Spot mit Standort öffnen und die Mini-Karte ansehen. | Die Mini-Karte zeigt einen Pin an der Position des Spots. | | | |
+| T44 | Detail Mini-Karte antippen | In der Detailansicht auf die Mini-Karte tippen. | Der Tab Karte öffnet sich, zentriert auf den Spot. | | | |
+| T45 | Detail Spot ohne Standort | Einen Spot ohne gespeicherten Standort öffnen. | Statt der Mini-Karte erscheint ein Hinweis, dass für den Spot kein Standort gespeichert ist, mit dem Button "Bearbeiten". Der Button öffnet das Formular. | | | |
 
 ## 4. Fehlerprotokoll
 
