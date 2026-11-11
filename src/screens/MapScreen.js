@@ -24,6 +24,7 @@ import { radius, spacing, touch } from '../theme';
 // S3 · Karte (Special Feature GPS)
 // Alle Spots als Pins, eigener Standort als «Du», Zentrier-Button 48 × 48,
 // Tipp auf Pin → Infokarte unten → «Details ›» → S4.
+// Von S4 kommt optional der Parameter focusSpotId: Karte zentriert auf diesen Spot und öffnet die Infokarte.
 // Mit Standort zeigt die Karte nur Spots im Suchradius aus den Einstellungen, ohne Standort alle.
 // Sonderzustände: Laden, Standort aus (Berechtigung/Dienste), Standortfehler, kein Netz,
 // keine Spots mit Standort, keine Spots im Radius.
@@ -35,6 +36,10 @@ const METER_PRO_GRAD = 111320;
 
 // «Ohne Standort weiter» gilt für die ganze App-Sitzung, auch wenn der Tab neu aufgebaut wird
 let standortHinweisAusgeblendet = false;
+
+function regionForSpot(spot) {
+  return { latitude: spot.lat, longitude: spot.lng, latitudeDelta: USER_DELTA / 2, longitudeDelta: USER_DELTA / 2 };
+}
 
 // Ausschnitt um den Standort, gross genug, dass der ganze Suchradius sichtbar ist
 function regionAround(coords, radius) {
@@ -87,7 +92,7 @@ function UserMarker({ coords }) {
   );
 }
 
-export default function MapScreen({ navigation }) {
+export default function MapScreen({ navigation, route }) {
   const { colors, fontSizes } = useTheme();
   const styles = useMemo(() => makeStyles(colors, fontSizes), [colors, fontSizes]);
   const { spots, loading, settings } = useApp();
@@ -103,9 +108,14 @@ export default function MapScreen({ navigation }) {
 
   const spotsWithCoords = useMemo(() => spots.filter(hasCoords), [spots]);
   const missingCoords = spots.length - spotsWithCoords.length;
-  // Startausschnitt nur einmal nach dem Laden festlegen, danach bestimmt der Nutzer
+  const focusSpotId = route.params?.focusSpotId;
+  // Startausschnitt nur einmal nach dem Laden festlegen, danach bestimmt der Nutzer.
+  // Kommt der erste Aufruf von S4, gleich auf den Spot starten statt erst alle Spots zu zeigen.
   const initialRegion = useRef(null);
-  if (!initialRegion.current && !loading) initialRegion.current = regionForSpots(spotsWithCoords);
+  if (!initialRegion.current && !loading) {
+    const focus = spotsWithCoords.find((s) => s.id === focusSpotId);
+    initialRegion.current = focus ? regionForSpot(focus) : regionForSpots(spotsWithCoords);
+  }
 
   // Radius nur mit gültigem Standort anwenden, sonst würde die Karte grundlos leer
   const suchradius = settings.suchradius ?? null;
@@ -115,8 +125,10 @@ export default function MapScreen({ navigation }) {
     [radiusActive, spotsWithCoords, coords, suchradius]
   );
 
-  // Gelöschte oder ausgefilterte Spots: Infokarte nicht mehr anzeigen
-  const selected = visibleSpots.find((s) => s.id === selectedId) ?? null;
+  // Gelöschte Spots: Infokarte nicht mehr anzeigen. Der gewählte Spot bleibt sichtbar,
+  // auch wenn er ausserhalb des Radius liegt (z. B. von S4 aus «auf Karte» geöffnet).
+  const selected = spotsWithCoords.find((s) => s.id === selectedId) ?? null;
+  const pins = selected && !visibleSpots.includes(selected) ? [...visibleSpots, selected] : visibleSpots;
 
   const checkNetwork = useCallback(async () => {
     setCheckingNet(true);
@@ -152,6 +164,21 @@ export default function MapScreen({ navigation }) {
       centerOnUser();
     }
   }, [status, coords, centerOnUser]);
+
+  // Fokus von S4: zentrieren, Infokarte öffnen und Parameter zurücksetzen,
+  // damit ein späterer Tab-Wechsel nicht wieder auf denselben Spot springt
+  useEffect(() => {
+    if (!focusSpotId || loading) return;
+    const spot = spotsWithCoords.find((s) => s.id === focusSpotId);
+    if (spot) {
+      // Automatisches Zentrieren auf «Du» darf den Fokus nicht überschreiben
+      userMoved.current = true;
+      centeredOnce.current = true;
+      setSelectedId(spot.id);
+      mapRef.current?.animateToRegion(regionForSpot(spot), 500);
+    }
+    navigation.setParams({ focusSpotId: undefined });
+  }, [focusSpotId, loading, spotsWithCoords, navigation]);
 
   const onCenterPress = () => {
     if (status === 'ready' && coords) centerOnUser();
@@ -205,7 +232,7 @@ export default function MapScreen({ navigation }) {
         moveOnMarkerPress={false}
         accessibilityLabel="Karte mit allen Spots"
       >
-        {visibleSpots.map((spot) => (
+        {pins.map((spot) => (
           <Marker
             key={spot.id}
             coordinate={{ latitude: spot.lat, longitude: spot.lng }}
@@ -295,7 +322,7 @@ export default function MapScreen({ navigation }) {
             </Text>
             <PrimaryButton title="Liste anzeigen" variant="secondary" onPress={() => navigation.navigate('Spots')} style={styles.bannerButton} />
           </View>
-        ) : radiusActive && visibleSpots.length === 0 ? (
+        ) : radiusActive && visibleSpots.length === 0 && !selected ? (
           <View style={styles.banner}>
             <Text style={styles.bannerTitle}>Keine Spots im Umkreis von {radiusText}</Text>
             <Text style={styles.bannerText}>
