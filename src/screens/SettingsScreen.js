@@ -10,7 +10,6 @@ import { fontSizes, spacing, touch } from '../theme';
 // TODO (Mockup S5):
 //  - Segment «Nach Distanz / Nach Bewertung»
 //  - Export als JSON über Teilen-Menü (Share API) mit Lade-Zustand
-//  - Dark Mode und grosse Schrift tatsächlich anwenden
 export default function SettingsScreen() {
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
@@ -25,13 +24,6 @@ export default function SettingsScreen() {
 
   return (
     <ScrollView style={styles.container}>
-      <Section title="Liste" />
-      <SwitchRow
-        label="Geschlossene Spots ausblenden"
-        value={settings.geschlosseneAusblenden}
-        onChange={(v) => updateSettings({ geschlosseneAusblenden: v })}
-      />
-
       <Section title="Erfassen" />
       <SwitchRow
         label="Standort automatisch übernehmen"
