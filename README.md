@@ -22,10 +22,10 @@ Danach den QR-Code mit dem Handy scannen und die App in Expo Go öffnen.
 
 ## Screens
 
-| Screen | Name eintragen |
+| Screen | Name |
 |---|---|
-| SpotsListScreen | |
-| SpotFormScreen | |
-| MapScreen | |
-| SpotDetailScreen | |
-| SettingsScreen | |
+| SpotsListScreen | Ivan |
+| SpotFormScreen | Jannis |
+| MapScreen | Ivan |
+| SpotDetailScreen | Ivan |
+| SettingsScreen | Jannis und Ivan |

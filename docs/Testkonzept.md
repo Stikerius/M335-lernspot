@@ -72,6 +72,8 @@ Jeder Testfall wird auf beiden Geräten durchgeführt. Die Spalten Ergebnis iPho
 | T43 | Detail Mini-Karte | Einen Spot mit Standort öffnen und die Mini-Karte ansehen. | Die Mini-Karte zeigt einen Pin an der Position des Spots. | | | |
 | T44 | Detail Mini-Karte antippen | In der Detailansicht auf die Mini-Karte tippen. | Der Tab Karte öffnet sich, zentriert auf den Spot. | | | |
 | T45 | Detail Spot ohne Standort | Einen Spot ohne gespeicherten Standort öffnen. | Statt der Mini-Karte erscheint ein Hinweis, dass für den Spot kein Standort gespeichert ist, mit dem Button "Bearbeiten". Der Button öffnet das Formular. | | | |
+| T46 | Route starten | Einen Spot mit Standort öffnen und auf "Route starten" tippen. Danach einen Spot ohne Standort öffnen. | Die Karten App öffnet sich mit diesem Spot als Ziel. Bei einem Spot ohne Standort gibt es keinen Button "Route starten". | | | |
+| T47 | Favorit Toast | In der Detailansicht oben rechts auf den Stern tippen, danach erneut. | Beim ersten Tippen erscheint kurz "Zu Favoriten hinzugefügt", beim zweiten "Aus Favoriten entfernt". | | | |
 
 ## 4. Fehlerprotokoll
 
