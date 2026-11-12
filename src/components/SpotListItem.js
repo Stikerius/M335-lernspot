@@ -8,7 +8,6 @@ import { radius, spacing, touch } from '../theme';
 
 // Eine Zeile in der Spot-Liste (S1). Ganze Zeile antippbar, 72 dp hoch.
 // distance in Metern; ohne Standort (null) wird keine Distanz angezeigt.
-// TODO (Mockup S1): Öffnungszeit ergänzen.
 export default function SpotListItem({ spot, distance = null, onPress }) {
   const { colors, fontSizes } = useTheme();
   const styles = useMemo(() => makeStyles(colors, fontSizes), [colors, fontSizes]);
@@ -38,6 +37,11 @@ export default function SpotListItem({ spot, distance = null, onPress }) {
           {spot.wlan ? ' · 📶' : ''}
           {spot.steckdosen ? ' · 🔌' : ''}
         </Text>
+        {spot.oeffnungszeiten?.trim() ? (
+          <Text style={styles.meta} numberOfLines={1}>
+            🕐 {spot.oeffnungszeiten}
+          </Text>
+        ) : null}
       </View>
       <Text style={styles.chevron}>›</Text>
     </Pressable>
