@@ -1,5 +1,5 @@
-import { useMemo } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { useMemo, useState } from 'react';
+import { ActivityIndicator, Alert, Pressable, ScrollView, Share, StyleSheet, Switch, Text, View } from 'react-native';
 
 import { useApp } from '../context/AppContext';
 import useTheme from '../hooks/useTheme';
@@ -8,13 +8,32 @@ import { SORT_OPTIONS } from '../utils/sortSpots';
 import { radius, spacing, touch } from '../theme';
 
 // S5 · Einstellungen (Tab)
-// Grundgerüst: Schalter werden sofort in AsyncStorage gespeichert, «Alle Daten löschen» mit Bestätigung.
-// TODO (Mockup S5):
-//  - Export als JSON über Teilen-Menü (Share API) mit Lade-Zustand
+// Schalter werden sofort in AsyncStorage gespeichert, «Alle Daten löschen» mit Bestätigung.
+// «Spots exportieren» teilt alle Spots als JSON über das Teilen-Menü (Backup).
 export default function SettingsScreen() {
   const { colors, fontSizes } = useTheme();
   const styles = useMemo(() => makeStyles(colors, fontSizes), [colors, fontSizes]);
   const { settings, updateSettings, resetAll, spots } = useApp();
+  const [exporting, setExporting] = useState(false);
+  const keineSpots = spots.length === 0;
+  const exportDisabled = keineSpots || exporting;
+
+  // Teilen-Menü statt Datei, damit kein zusätzliches Paket nötig ist (läuft in Expo Go)
+  async function exportSpots() {
+    if (exportDisabled) return;
+    setExporting(true);
+    try {
+      const json = JSON.stringify({ exportiertAm: new Date().toISOString(), spots }, null, 2);
+      await Share.share({ title: 'LernSpots Export', message: json });
+    } catch (e) {
+      console.warn('Export fehlgeschlagen', e);
+      Alert.alert('Export fehlgeschlagen', 'Deine Spots konnten nicht exportiert werden. Bitte versuche es erneut.', [
+        { text: 'OK' },
+      ]);
+    } finally {
+      setExporting(false);
+    }
+  }
 
   function confirmReset() {
     Alert.alert('Alle Daten löschen?', 'Alle Spots und Einstellungen werden endgültig gelöscht.', [
@@ -55,6 +74,26 @@ export default function SettingsScreen() {
       <SwitchRow label="Grosse Schrift" value={settings.grosseSchrift} onChange={(v) => updateSettings({ grosseSchrift: v })} />
 
       <Section title="Daten" />
+      <Pressable
+        onPress={exportSpots}
+        disabled={exportDisabled}
+        style={({ pressed }) => [styles.row, styles.exportRow, pressed && styles.pressed]}
+        accessibilityRole="button"
+        accessibilityLabel="Spots exportieren"
+        accessibilityHint={keineSpots ? 'Keine Spots zum Exportieren' : 'Öffnet das Teilen-Menü mit allen Spots als JSON'}
+        accessibilityState={{ disabled: exportDisabled, busy: exporting }}
+      >
+        <View style={styles.rowText}>
+          <Text style={[styles.rowTitle, exportDisabled && styles.rowLabelDisabled]}>📤 Spots exportieren</Text>
+          {keineSpots ? <Text style={styles.hint}>Keine Spots zum Exportieren</Text> : null}
+          {exporting ? <Text style={styles.hint}>Export wird erstellt …</Text> : null}
+        </View>
+        {exporting ? (
+          <ActivityIndicator size="small" color={colors.primary} />
+        ) : (
+          <Text style={[styles.chevron, exportDisabled && styles.rowLabelDisabled]}>›</Text>
+        )}
+      </Pressable>
       <Pressable
         onPress={confirmReset}
         style={({ pressed }) => [styles.row, pressed && styles.pressed]}
@@ -152,6 +191,12 @@ const makeStyles = (colors, fontSizes) =>
     },
     pressed: { backgroundColor: colors.primaryLight },
     rowLabel: { fontSize: fontSizes.body, color: colors.text, flex: 1, marginRight: spacing.m },
+    // Abstand zur roten Löschen-Zeile, damit man sie nicht versehentlich trifft
+    exportRow: { marginBottom: spacing.s },
+    rowText: { flex: 1, marginRight: spacing.m, paddingVertical: spacing.s, gap: spacing.xs },
+    rowTitle: { fontSize: fontSizes.body, color: colors.text },
+    rowLabelDisabled: { color: colors.textMuted },
+    chevron: { fontSize: fontSizes.title, color: colors.textMuted },
     segmentRow: {
       minHeight: touch.settingsRow,
       paddingHorizontal: spacing.m,
