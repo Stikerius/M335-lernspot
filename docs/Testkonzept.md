@@ -74,6 +74,7 @@ Jeder Testfall wird auf beiden Geräten durchgeführt. Die Spalten Ergebnis iPho
 | T45 | Detail Spot ohne Standort | Einen Spot ohne gespeicherten Standort öffnen. | Statt der Mini-Karte erscheint ein Hinweis, dass für den Spot kein Standort gespeichert ist, mit dem Button "Bearbeiten". Der Button öffnet das Formular. | | | |
 | T46 | Route starten | Einen Spot mit Standort öffnen und auf "Route starten" tippen. Danach einen Spot ohne Standort öffnen. | Die Karten App öffnet sich mit diesem Spot als Ziel. Bei einem Spot ohne Standort gibt es keinen Button "Route starten". | | | |
 | T47 | Favorit Toast | In der Detailansicht oben rechts auf den Stern tippen, danach erneut. | Beim ersten Tippen erscheint kurz "Zu Favoriten hinzugefügt", beim zweiten "Aus Favoriten entfernt". | | | |
+| T48 | JSON Export | In den Einstellungen im Abschnitt Daten auf "Spots exportieren" tippen. | Das Teilen Menü öffnet sich mit dem JSON aller Spots. Ohne gespeicherte Spots ist die Zeile deaktiviert. | | | |
 
 ## 4. Fehlerprotokoll
 
