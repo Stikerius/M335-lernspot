@@ -250,3 +250,41 @@ Voraussetzung ist Node.js auf dem Computer und die App Expo Go auf dem Handy.
 1. Im Projektordner "npm install" ausführen.
 2. "npx expo start" ausführen.
 3. Den QR Code mit dem Handy scannen und die App in Expo Go öffnen.
+
+## Testergebnisse
+
+Die Testfälle und die Ergebnisse auf iPhone und Android stehen im Testkonzept in "docs/Testkonzept.md".
+
+## Abweichungen zum Konzept und bekannte Einschränkungen
+
+Verglichen wurde der Code mit dem Konzept in "docs/LB1_Konzept_LernSpots.pdf".
+
+### Nicht umgesetzt
+
+- Das Speichern eines Entwurfs im Formular ist nicht umgesetzt. Der Schlüssel "@lernspots/draft" und die Funktionen "saveDraft", "loadDraft" und "clearDraft" sind in "storage.js" vorhanden, werden aber nirgends aufgerufen. Wird die App beim Erfassen beendet, gehen die Eingaben verloren.
+- Die Duplikat Warnung "Diesen Spot hast du schon gespeichert" für einen gleichen Namen in weniger als 50 m ist nicht umgesetzt.
+- Der Export der Spots als JSON über das Teilen Menü in den Einstellungen ist nicht umgesetzt.
+- Die Einstellung "Geschlossene Spots ausblenden" fehlt. Die Öffnungszeiten sind freier Text und werden nicht ausgewertet.
+- Auf der Karte gibt es kein langes Drücken zum Erfassen eines Spots an dieser Stelle und keinen Button "Spot hier hinzufügen". Das Formular kann zwar Koordinaten als Parameter annehmen, die Karte übergibt aber keine.
+- Auf der Karte gibt es keinen Button "Filter". Die Filter Chips der Liste wirken nicht auf der Karte.
+- Die Pins auf der Karte zeigen kein Symbol der Kategorie, sondern unterscheiden sich nur in der Farbe zwischen normal und ausgewählt.
+- Die Infokarte auf der Karte lässt sich nicht durch Wischen nach unten schliessen, sondern mit "Schliessen" oder einem Tipp auf die Karte.
+- Nach dem Löschen eines Spots erscheint kein Toast "gelöscht". Die App kehrt direkt zur vorherigen Ansicht zurück.
+- In der Liste gibt es keinen Button "Sortieren" oben rechts. Die Sortierung wählt man nur in den Einstellungen.
+
+### Anders umgesetzt als im Konzept
+
+- Die Sortierung hat drei Werte "naechste", "ruhe" und "neueste" statt der zwei Werte "distanz" und "bewertung" aus dem Konzept. Alte gespeicherte Werte werden beim Laden umgewandelt.
+- Neu ist die Einstellung "Suchradius" für die Karte. Sie steht nicht im Konzept.
+- Neu ist ein Suchfeld nach Namen oben in der Liste. Es steht nicht im Konzept.
+- Ohne Standort ersetzt die Liste die Distanz nicht durch einen Strich, sondern lässt sie weg und zeigt oben den Hinweis "Ohne Standort" mit alphabetischer Sortierung.
+- In der Detailansicht führt eine Mini Karte zur grossen Karte. Das Konzept zeigt dort eine Zeile mit Distanz und "Auf Karte".
+- Ob der Standort beim Erfassen automatisch übernommen wird, lässt sich in den Einstellungen mit "Standort automatisch übernehmen" ausschalten.
+- Das dunkle Design folgt nur dem Schalter "Dunkles Design" in der App und nicht der Einstellung des Systems. In "app.json" ist "userInterfaceStyle" auf "light" gesetzt.
+
+### Bekannte Einschränkungen
+
+- Die Koordinaten der Beispiel Spots sind laut Kommentar in "seedSpots.js" ungefähre Werte.
+- Die Prüfung auf Netz hängt davon ab, dass die Prüfadresse von Google erreichbar ist. Sie läuft nur beim Wechsel auf den Tab "Karte" und bei "Erneut prüfen".
+- Die Tab Symbole sind Textzeichen und keine Icons aus einer Bibliothek.
+- Die App hat keine Synchronisation und kein Backup. Wird die App gelöscht, sind alle Spots weg.
