@@ -1,11 +1,12 @@
-import { useLayoutEffect, useMemo } from 'react';
-import { Alert, Linking, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useCallback, useLayoutEffect, useMemo, useState } from 'react';
+import { AccessibilityInfo, Alert, Linking, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useApp } from '../context/AppContext';
 import { getCategory } from '../data/categories';
 import PrimaryButton from '../components/PrimaryButton';
+import Toast from '../components/Toast';
 import useTheme from '../hooks/useTheme';
 import { useLocation } from '../hooks/useLocation';
 import { distanceToSpot, formatDistance, hasCoords } from '../utils/distance';
@@ -14,8 +15,6 @@ import { radius, sizes, spacing, touch } from '../theme';
 // S4 · Detail (Stack)
 // Daten anzeigen, Distanz zum Standort, Mini-Karte (Tap → Karte zentriert auf den Spot),
 // Favorit, Bearbeiten (Modal), Löschen mit Bestätigung, Route starten.
-// TODO (Mockup S4):
-//  - Toast «Zu Favoriten hinzugefügt»
 
 // Ausschnitt der Mini-Karte, ca. 500 m rund um den Spot
 const MINI_DELTA = 0.005;
@@ -35,14 +34,25 @@ export default function SpotDetailScreen({ navigation, route }) {
   const { coords } = useLocation();
   const insets = useSafeAreaInsets();
   const spot = getSpot(route.params?.spotId);
+  // id wechselt bei jeder Meldung, damit der Toast auch bei schnellem Tippen neu startet
+  const [toast, setToast] = useState(null);
+  const hideToast = useCallback(() => setToast(null), []);
 
   useLayoutEffect(() => {
     if (!spot) return;
+    // Neuen Zustand vorher berechnen, weil spot erst nach dem nächsten Render aktualisiert ist
+    function handleFavorite() {
+      const wirdFavorit = !spot.favorit;
+      toggleFavorite(spot.id);
+      const text = wirdFavorit ? 'Zu Favoriten hinzugefügt ✓' : 'Aus Favoriten entfernt';
+      setToast({ text, id: Date.now() });
+      AccessibilityInfo.announceForAccessibility(text);
+    }
     navigation.setOptions({
       title: spot.name,
       headerRight: () => (
         <Pressable
-          onPress={() => toggleFavorite(spot.id)}
+          onPress={handleFavorite}
           hitSlop={12}
           style={{ minWidth: touch.min, minHeight: touch.min, alignItems: 'center', justifyContent: 'center' }}
           accessibilityRole="button"
@@ -154,6 +164,8 @@ export default function SpotDetailScreen({ navigation, route }) {
           <PrimaryButton title="🧭 Route starten" onPress={startRoute} />
         </View>
       ) : null}
+
+      {toast ? <Toast key={toast.id} message={toast.text} onHide={hideToast} /> : null}
     </View>
   );
 }
