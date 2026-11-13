@@ -98,6 +98,7 @@ export default function SettingsScreen() {
         onPress={confirmReset}
         style={({ pressed }) => [styles.row, pressed && styles.pressed]}
         accessibilityRole="button"
+        accessibilityLabel="Alle Daten löschen"
       >
         <Text style={[styles.rowLabel, { color: colors.danger }]}>🗑 Alle Daten löschen …</Text>
       </Pressable>
