@@ -174,6 +174,8 @@ Beim Start der App lädt der AppContext Spots, Einstellungen und Filter. Solange
 
 "Alle Daten löschen" in den Einstellungen fragt zuerst mit einem Dialog nach. Danach entfernt "clearAll" alle Schlüssel, der AppContext setzt Spots, Einstellungen und Filter zurück und setzt "@lernspots/seeded" gleich wieder auf true. Darum erscheinen auch danach keine Beispiel Spots.
 
+"Spots exportieren" in den Einstellungen erstellt mit "JSON.stringify" ein Objekt mit den Feldern "exportiertAm" als ISO Datum und "spots", eingerückt mit zwei Leerzeichen, und öffnet damit das Teilen Menü über "Share.share". Während des Exports zeigt die Zeile einen Ladekreis und ist deaktiviert. Ohne Spots ist sie ebenfalls deaktiviert und zeigt "Keine Spots zum Exportieren". Schlägt der Export fehl, erscheint ein Dialog mit einer verständlichen Meldung. Der Export wird als Text geteilt und nicht als Datei. Einen Import gibt es nicht.
+
 ## Geräte-Feature
 
 Das Geräte-Feature ist GPS mit Karte. Es besteht aus dem Standort über "expo-location", der Karte über "react-native-maps", der Distanzberechnung und dem Starten einer Route in einer Karten App.
@@ -263,7 +265,6 @@ Verglichen wurde der Code mit dem Konzept in "docs/LB1_Konzept_LernSpots.pdf".
 
 - Das Speichern eines Entwurfs im Formular ist nicht umgesetzt. Der Schlüssel "@lernspots/draft" und die Funktionen "saveDraft", "loadDraft" und "clearDraft" sind in "storage.js" vorhanden, werden aber nirgends aufgerufen. Wird die App beim Erfassen beendet, gehen die Eingaben verloren.
 - Die Duplikat Warnung "Diesen Spot hast du schon gespeichert" für einen gleichen Namen in weniger als 50 m ist nicht umgesetzt.
-- Der Export der Spots als JSON über das Teilen Menü in den Einstellungen ist nicht umgesetzt.
 - Die Einstellung "Geschlossene Spots ausblenden" fehlt. Die Öffnungszeiten sind freier Text und werden nicht ausgewertet.
 - Auf der Karte gibt es kein langes Drücken zum Erfassen eines Spots an dieser Stelle und keinen Button "Spot hier hinzufügen". Das Formular kann zwar Koordinaten als Parameter annehmen, die Karte übergibt aber keine.
 - Auf der Karte gibt es keinen Button "Filter". Die Filter Chips der Liste wirken nicht auf der Karte.
